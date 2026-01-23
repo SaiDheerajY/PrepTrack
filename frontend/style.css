@@ -1,0 +1,67 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: monospace;
+}
+:root{
+  --bg: #000000;
+  --neon: #00ff9c;
+  --muted: #7affcf;    
+}
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--neon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.container {
+  width: 92%;
+  max-width: 520px;
+  text-align: center;
+}
+.header h1 {
+  font-size: 3rem;
+  text-shadow: 0 0 100px var(--neon);
+  margin-bottom: 8px;
+}
+.tagline {
+  color: var(--muted);       /* softer color */
+  margin-bottom: 28px;
+}
+.card {
+  border: 1px solid var(--neon);     /* neon border */
+  padding: 20px;
+  box-shadow: 0 0 5px var(--neon);  /* glow effect */
+  margin-bottom: 28px;
+}
+.card h2 {
+  margin-bottom: 12px;
+}
+.card ul{
+    list-style: none;
+}
+.card li{
+ margin: 8px 0;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+}
+.primary {
+  background: transparent;           /* transparent background */
+  border: 1px solid var(--neon);     /* neon border */
+  color: var(--neon);                /* neon text */
+  padding: 12px 22px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;        /* smooth hover animation */
+}
+.primary:hover {
+  background: var(--neon);          /* fill with neon color */
+  color: #000;                        /* black text */
+  box-shadow: 0 0 200px var(--neon);   /* glowing effect */
+  font-weight: bold;
+}
