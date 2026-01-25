@@ -83,3 +83,35 @@ addVideoBtn.addEventListener("click", () => {
   renderVideos();
 });
 renderVideos();
+//contests 
+// Contest elements
+const upcomingList = document.getElementById("upcomingList");
+const pastList = document.getElementById("pastList");
+
+// Mock contest data
+const contests = [
+  { name: "LeetCode Weekly 390", date: "2026-02-02" },
+  { name: "Codeforces Round 950", date: "2026-01-30" },
+  { name: "LeetCode Biweekly 120", date: "2026-01-15" }
+];
+function renderContests() {
+  upcomingList.innerHTML = "";
+  pastList.innerHTML = "";
+
+  const today = new Date();
+
+  contests.forEach(contest => {
+    const contestDate = new Date(contest.date);
+    const li = document.createElement("li");
+    li.textContent = `${contest.name} — ${contest.date}`;
+
+    if (contestDate >= today) {
+      upcomingList.appendChild(li);
+    } else {
+      pastList.appendChild(li);
+    }
+  });
+}
+
+renderContests();
+

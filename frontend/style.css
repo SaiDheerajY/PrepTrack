@@ -189,5 +189,32 @@ body {
   padding: 0 16px;
   border-radius: 999px;
 }
+#videoList li {
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+#videoList li:hover {
+  color: var(--muted);
+}
+.contest-section {
+  margin-top: 12px;
+}
+
+.contest-section h3 {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.contest-section ul {
+  list-style: none;
+}
+
+.contest-section li {
+  font-size: 0.90rem;
+  margin: 4px 0;
+}
+
 
 
