@@ -9,6 +9,8 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [videos, setVideos] = useState([]);
   const [streak, setStreak] = useState(0);
+  const [dailyLog, setDailyLog] = useState({});
+
  function markActivity() {
   const today = new Date().toDateString();
   const lastStreakDate = localStorage.getItem("lastStreakDate");
@@ -17,6 +19,40 @@ function App() {
     setStreak((prev) => prev + 1);
     localStorage.setItem("lastStreakDate", today);
   }
+}
+function resetTasks() {
+  const today = new Date().toDateString();
+
+  const completedTasks = tasks
+    .filter(t => t.completed)
+    .map(t => t.text);
+
+  setDailyLog(prev => ({
+    ...prev,
+    [today]: {
+      ...(prev[today] || {}),
+      tasksCompleted: completedTasks
+    }
+  }));
+
+  setTasks([]);
+}
+function resetVideos() {
+  const today = new Date().toDateString();
+
+  const completedVideos = videos
+    .filter(v => v.completed)
+    .map(v => v.url);
+
+  setDailyLog(prev => ({
+    ...prev,
+    [today]: {
+      ...(prev[today] || {}),
+      videosCompleted: completedVideos
+    }
+  }));
+
+  setVideos([]);
 }
 
 
@@ -51,6 +87,15 @@ useEffect(() => {
     if(!loaded) return;
   localStorage.setItem("streak", JSON.stringify(streak));
 }, [streak,loaded]);
+  useEffect(() => {
+    const savedLog = JSON.parse(localStorage.getItem("dailyLog"));
+   if (savedLog) setDailyLog(savedLog);
+  }, []);
+  useEffect(() => {
+  localStorage.setItem("dailyLog", JSON.stringify(dailyLog));
+}, [dailyLog]);
+
+
 
   return (
   <div className="dashboard">
@@ -59,12 +104,14 @@ useEffect(() => {
   tasks={tasks}
   setTasks={setTasks}
   markActivity={markActivity}
+  resetTasks={resetTasks}
 />
 
 <Videos
   videos={videos}
   setVideos={setVideos}
   markActivity={markActivity}
+  resetVideos={resetVideos}
 />
 
     </div>

@@ -1,11 +1,12 @@
 import { useState } from "react";
 
-function Videos({ videos, setVideos, markActivity}) {
+function Videos({ videos, setVideos, markActivity,resetVideos}) {
   const [videoInput, setVideoInput] = useState("");
 
   return (
     <div>
       <h2>Videos</h2>
+
 
       <input
         type="text"
@@ -27,8 +28,9 @@ function Videos({ videos, setVideos, markActivity}) {
           markActivity();
         }}
       >
-        Add Video
+        Add
       </button>
+      <button className="reset-btn" onClick={resetVideos}>Reset</button>
 
       <ul>
         {videos.map((video, index) => (
