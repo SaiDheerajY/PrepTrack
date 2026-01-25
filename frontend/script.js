@@ -2,8 +2,22 @@
 const taskInput = document.getElementById("taskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const taskList = document.getElementById("taskList");
+ // video elements
+const videoInput = document.getElementById("videoInput");
+const addVideoBtn = document.getElementById("addVideoBtn");
+const videoList = document.getElementById("videoList");
+// Contest elements
+const upcomingList = document.getElementById("upcomingList");
+const pastList = document.getElementById("pastList");
 
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
+const contests = [
+  { name: "LeetCode Weekly 390", date: "2026-02-02" },
+  { name: "Codeforces Round 950", date: "2026-01-30" },
+  { name: "LeetCode Biweekly 120", date: "2026-01-15" },
+  { name: "LeetCode Biweekly 122", date: "2026-01-27" }
+];
 
 // Function to show tasks on the page
 function renderTasks() {
@@ -37,11 +51,6 @@ addTaskBtn.addEventListener("click",() =>{
 });
 renderTasks();
 // Video elements
-const videoInput = document.getElementById("videoInput");
-const addVideoBtn = document.getElementById("addVideoBtn");
-const videoList = document.getElementById("videoList");
-
-let videos = JSON.parse(localStorage.getItem("videos")) || [];
 function renderVideos() {
   videoList.innerHTML = "";
 
@@ -84,16 +93,8 @@ addVideoBtn.addEventListener("click", () => {
 });
 renderVideos();
 //contests 
-// Contest elements
-const upcomingList = document.getElementById("upcomingList");
-const pastList = document.getElementById("pastList");
 
 // Mock contest data
-const contests = [
-  { name: "LeetCode Weekly 390", date: "2026-02-02" },
-  { name: "Codeforces Round 950", date: "2026-01-30" },
-  { name: "LeetCode Biweekly 120", date: "2026-01-15" }
-];
 function renderContests() {
   upcomingList.innerHTML = "";
   pastList.innerHTML = "";

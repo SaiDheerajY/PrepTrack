@@ -33,7 +33,7 @@ body {
 }
 .card {
   border: 1px solid var(--neon);     /* neon border */
-  padding: 20px;
+  padding: 22px;
   box-shadow: 0 0 5px var(--neon);  /* glow effect */
   margin-bottom: 28px;
 }
@@ -79,6 +79,10 @@ body {
   padding: 20px;
   box-shadow: 0 0 5px var(--neon);
 }
+.card + .card {
+  margin-top: 8px;
+}
+
 
 /* 
   Card title
@@ -214,6 +218,22 @@ body {
 .contest-section li {
   font-size: 0.90rem;
   margin: 4px 0;
+}
+#taskList li,
+#videoList li {
+  padding: 6px 4px;
+  border-radius: 6px;
+}
+
+#taskList li:hover,
+#videoList li:hover {
+  background: rgba(0, 255, 156, 0.08);
+}
+input::placeholder {
+  color: rgba(0, 255, 156, 0.5);
+}
+li {
+  font-size: 0.9rem;
 }
 
 
