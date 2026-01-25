@@ -1,56 +1,35 @@
 import { useState, useEffect } from "react";
+import Tasks from "./Tasks";
+import Videos from "./Videos";
 
 function App() {
   const [tasks, setTasks] = useState([]);
-  const [taskInput, setTaskInput] = useState("");
+  const [videos, setVideos] = useState([]);
 
-  // Load tasks once
+  // Load from localStorage
   useEffect(() => {
     const savedTasks = JSON.parse(localStorage.getItem("tasks"));
-    if (savedTasks) {
-      setTasks(savedTasks);
-    }
+    const savedVideos = JSON.parse(localStorage.getItem("videos"));
+
+    if (savedTasks) setTasks(savedTasks);
+    if (savedVideos) setVideos(savedVideos);
   }, []);
 
-  // Save tasks whenever they change
+  // Save tasks
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
+  // Save videos
+  useEffect(() => {
+    localStorage.setItem("videos", JSON.stringify(videos));
+  }, [videos]);
+
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Tasks</h2>
-
-      <input
-        type="text"
-        placeholder="Add a task..."
-        value={taskInput}
-        onChange={(e) => setTaskInput(e.target.value)}
-      />
-
-      <button
-        onClick={() => {
-          if (taskInput.trim() === "") return;
-          setTasks([...tasks, taskInput]);
-          setTaskInput("");
-        }}
-      >
-        Add
-      </button>
-
-      <ul>
-        {tasks.map((task, index) => (
-          <li
-            key={index}
-            onClick={() =>
-              setTasks(tasks.filter((_, i) => i !== index))
-            }
-            style={{ cursor: "pointer" }}
-          >
-            {task}
-          </li>
-        ))}
-      </ul>
+      <Tasks tasks={tasks} setTasks={setTasks} />
+      <hr />
+      <Videos videos={videos} setVideos={setVideos} />
     </div>
   );
 }
