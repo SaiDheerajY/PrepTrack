@@ -79,8 +79,13 @@ function resetVideos() {
   const today = new Date().toDateString();
 
   const completedVideos = videos
-    .filter(v => v.completed)
-    .map(v => v.url);
+    .filter(v => v.completed && v.progress >= 90)
+    .map(v => v.title);
+
+  if (completedVideos.length === 0) {
+    setVideos([]);
+    return;
+  }
 
   setDailyLog(prev => ({
     ...prev,
@@ -92,9 +97,6 @@ function resetVideos() {
 
   setVideos([]);
 }
-
-
-
   // Load from localStorage
 useEffect(() => {
   const savedTasks = JSON.parse(localStorage.getItem("tasks"));
@@ -166,7 +168,8 @@ useEffect(() => {
 />
 
   <div className="right-panel" >
-  <Calendar dailyLog={dailyLog} />    {/* new */}
+  <Calendar dailyLog={dailyLog} /> 
+  <br></br>
   <Contests />     {/* moved down */}
   <div className="streak-box">
     <h2>Streak</h2>

@@ -1,23 +1,24 @@
 import { useState } from "react";
 
-function Calendar({ dailyLog={} }) {
+function Calendar({ dailyLog = {} }) {
   const today = new Date();
-  const [selectedDate, setSelectedDate] = useState(today.toDateString());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const year = today.getFullYear();
   const month = today.getMonth();
 
-  const firstDay = new Date(year, month, 1).getDay();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const days = [];
 
-  // empty cells before month start
-  for (let i = 0; i < firstDay; i++) {
+  // Empty slots before first day
+  for (let i = 0; i < firstDayOfMonth; i++) {
     days.push(null);
   }
 
-  // actual days
+  // Actual days
   for (let d = 1; d <= daysInMonth; d++) {
     days.push(new Date(year, month, d));
   }
@@ -27,19 +28,22 @@ function Calendar({ dailyLog={} }) {
       <h2>Calendar</h2>
 
       <div className="calendar-grid">
-        {days.map((date, idx) => {
-          if (!date) return <div key={idx} />;
+        {days.map((date, index) => {
+          if (!date) return <div key={index} />;
 
           const dateStr = date.toDateString();
-          const hasActivity = dailyLog[dateStr];
+          const hasActivity = dailyLog?.[dateStr];
 
           return (
             <div
-              key={idx}
+              key={index}
               className={`calendar-cell ${
-                dateStr === selectedDate ? "active" : ""
+                selectedDate === dateStr ? "active" : ""
               }`}
-              onClick={() => setSelectedDate(dateStr)}
+              onClick={() => {
+                setSelectedDate(dateStr);
+                setShowModal(true);
+              }}
             >
               {date.getDate()}
               {hasActivity && <span className="dot" />}
@@ -48,18 +52,49 @@ function Calendar({ dailyLog={} }) {
         })}
       </div>
 
-      <div className="day-details">
-        <h3>{selectedDate}</h3>
+      {/* MODAL */}
+      {showModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>{selectedDate}</h2>
 
-        {dailyLog[selectedDate] ? (
-          <>
-            <p>Tasks done: {dailyLog[selectedDate].tasksCompleted?.length || 0}</p>
-            <p>Videos done: {dailyLog[selectedDate].videosCompleted?.length || 0}</p>
-          </>
-        ) : (
-          <p>No activity</p>
-        )}
-      </div>
+            <h3>Tasks completed</h3>
+            {dailyLog[selectedDate]?.tasksCompleted?.length ? (
+              <ul>
+                {dailyLog[selectedDate].tasksCompleted.map((task, i) => (
+                  <li key={i}>{task}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">No tasks</p>
+            )}
+
+            <h3>Videos watched</h3>
+            {dailyLog[selectedDate]?.videosCompleted?.length ? (
+              <ul>
+                {dailyLog[selectedDate].videosCompleted.map((video, i) => (
+                  <li key={i}>{video}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">No videos</p>
+            )}
+
+            <button
+              className="reset-btn"
+              onClick={() => setShowModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

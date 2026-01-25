@@ -29,7 +29,7 @@
 h1 {
   margin: 0px;
   font-size: 2.5rem;
-  color: var(--text-muted);
+  color: rgb(157, 193, 195);
 }
 
 h2 {
@@ -183,6 +183,7 @@ li.completed {
 
 .calendar-box {
   background: rgba(0, 0, 0, 0.6);
+  padding: 25px;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 18px;
@@ -215,10 +216,14 @@ li.completed {
 }
 
 .calendar-cell:hover {
+  border-radius: 50%;         /* Makes it a circle */
+  aspect-ratio: 1 / 1;
   background: rgba(0, 255, 156, 0.1);
 }
 
 .calendar-cell.active {
+  border-radius: 50%;         /* Makes it a circle */
+  aspect-ratio: 1 / 1;
   background: var(--neon);
   color: #000;
   font-weight: 600;
@@ -282,6 +287,76 @@ li.completed {
 
 .divider:hover {
   background: rgba(0, 255, 156, 0.3);
+}
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal h2 {
+  color: var(--neon);
+  margin-bottom: 12px;
+}
+
+.modal h3 {
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: var(--neon);
+}
+
+.modal ul {
+  margin-top: 6px;
+  padding-left: 16px;
+}
+
+.modal li {
+  font-size: 0.85rem;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.video-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Adjust this width to control how large the video appears in the panel */
+  width: 300px;  
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--neon);
+  transition: width 0.3s ease;
 }
 
 
