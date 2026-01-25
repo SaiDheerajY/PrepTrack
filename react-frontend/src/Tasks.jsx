@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-function Tasks({ tasks, setTasks }) {
+function Tasks({ tasks, setTasks, markActivity }) {
   const [taskInput, setTaskInput] = useState("");
 
   return (
@@ -19,6 +18,7 @@ function Tasks({ tasks, setTasks }) {
           if (taskInput.trim() === "") return;
           setTasks([...tasks, taskInput]);
           setTaskInput("");
+          markActivity();
         }}
       >
         Add
@@ -28,9 +28,10 @@ function Tasks({ tasks, setTasks }) {
         {tasks.map((task, index) => (
           <li
             key={index}
-            onClick={() =>
-              setTasks(tasks.filter((_, i) => i !== index))
-            }
+            onClick={() =>{
+              setTasks(tasks.filter((_, i) => i !== index));
+              markActivity();
+            }}
             style={{ cursor: "pointer" }}
           >
             {task}

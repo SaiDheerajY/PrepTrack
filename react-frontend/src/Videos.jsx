@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Videos({ videos, setVideos }) {
+function Videos({ videos, setVideos, markActivity}) {
   const [videoInput, setVideoInput] = useState("");
 
   return (
@@ -24,6 +24,7 @@ function Videos({ videos, setVideos }) {
           ]);
 
           setVideoInput("");
+          markActivity();
         }}
       >
         Add Video
@@ -33,13 +34,14 @@ function Videos({ videos, setVideos }) {
         {videos.map((video, index) => (
           <li
             key={index}
-            onClick={() =>
+            onClick={() =>{
               setVideos(
                 videos.map((v, i) =>
                   i === index ? { ...v, completed: !v.completed } : v
                 )
-              )
-            }
+              );
+              markActivity();
+            }}
             style={{
               cursor: "pointer",
               textDecoration: video.completed ? "line-through" : "none",

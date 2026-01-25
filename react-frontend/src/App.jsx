@@ -1,37 +1,89 @@
 import { useState, useEffect } from "react";
 import Tasks from "./Tasks";
 import Videos from "./Videos";
+import "./App.css";
+import Contests from "./contests";
 
 function App() {
+  const [loaded, setLoaded] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [streak, setStreak] = useState(0);
+ function markActivity() {
+  const today = new Date().toDateString();
+  const lastStreakDate = localStorage.getItem("lastStreakDate");
+
+  if (lastStreakDate !== today) {
+    setStreak((prev) => prev + 1);
+    localStorage.setItem("lastStreakDate", today);
+  }
+}
+
+
 
   // Load from localStorage
-  useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
-    const savedVideos = JSON.parse(localStorage.getItem("videos"));
+useEffect(() => {
+  const savedTasks = JSON.parse(localStorage.getItem("tasks"));
+  const savedVideos = JSON.parse(localStorage.getItem("videos"));
+  const savedStreak = JSON.parse(localStorage.getItem("streak"));
 
-    if (savedTasks) setTasks(savedTasks);
-    if (savedVideos) setVideos(savedVideos);
-  }, []);
+  if (savedTasks) setTasks(savedTasks);
+  if (savedVideos) setVideos(savedVideos);
+  if (savedStreak !== null) setStreak(savedStreak);
+
+  setLoaded(true); //  VERY IMPORTANT
+}, []);
+
 
   // Save tasks
   useEffect(() => {
+    if(!loaded)return;
     localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
+  }, [tasks,loaded]);
 
   // Save videos
   useEffect(() => {
+    if(!loaded)return;
     localStorage.setItem("videos", JSON.stringify(videos));
-  }, [videos]);
+  }, [videos,loaded]);
+  //streaksave
+  useEffect(() => {
+    if(!loaded) return;
+  localStorage.setItem("streak", JSON.stringify(streak));
+}, [streak,loaded]);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Tasks tasks={tasks} setTasks={setTasks} />
-      <hr />
-      <Videos videos={videos} setVideos={setVideos} />
+  <div className="dashboard">
+    <div className="left-panel">
+      <Tasks
+  tasks={tasks}
+  setTasks={setTasks}
+  markActivity={markActivity}
+/>
+
+<Videos
+  videos={videos}
+  setVideos={setVideos}
+  markActivity={markActivity}
+/>
+
     </div>
-  );
+
+    <div className="right-panel">
+  <Contests />
+
+  <h2>Streak</h2>
+<p>🔥 {streak} day{streak !== 1 ? "s" : ""}</p>
+</div>
+
+  </div>
+);
+window.addEventListener("mousemove", (e) => {
+  document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
+  document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
+});
+
 }
+
 
 export default App;
