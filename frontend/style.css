@@ -65,3 +65,113 @@ body {
   box-shadow: 0 0 200px var(--neon);   /* glowing effect */
   font-weight: bold;
 }
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* space between sections */
+}
+
+/* 
+  Card reused for all sections
+*/
+.card {
+  border: 1px solid var(--neon);
+  padding: 20px;
+  box-shadow: 0 0 5px var(--neon);
+}
+
+/* 
+  Card title
+*/
+.card h2 {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+/* 
+  Lists inside cards
+*/
+.card ul {
+  list-style: none;
+}
+
+.card li {
+  margin: 6px 0;
+  text-align: left;
+}
+
+/* 
+  Secondary button (less important than primary)
+*/
+.secondary {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px dashed var(--neon);
+  color: var(--neon);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.secondary:hover {
+  background: var(--neon);
+  color: black;
+  font-weight: bold;
+}
+/* Container holding input + button */
+.task-input {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Task input field */
+.task-input input {
+  flex: 1;
+  height: 32px;                 /* control height */
+  background: black;
+  border: 1px solid var(--neon);
+  color: var(--neon);
+  padding: 0 16px;              /* horizontal padding */
+  border-radius: 999px;         /* makes it pill-shaped */
+  outline: none;
+  font-size: 0.95rem;
+}
+
+/* Input focus glow */
+.task-input input:focus {
+  box-shadow: 0 0 8px var(--neon);
+}
+
+/* Add button */
+.task-input .secondary {
+  position: relative;
+  top: -6px;
+  height: 30px;                 /* same height as input */
+  padding: 0 20px;
+  border-radius: 9999px;         /* pill shape */
+  font-size: 0.9rem;
+  border: 1px solid rgba(0, 255, 156, 0.7);
+  box-shadow: 0 0 6px rgba(0, 255, 156, 0.6);
+}
+
+/* Hover refinement */
+.task-input .secondary:hover {
+  background: var(--muted);
+  color: black;
+  font-size: medium;
+  font-weight: bold;
+  border: 3px solid black;
+  box-shadow: 0 0 8px var(--neon);
+}
+#taskList li {
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+}
+
+#taskList li:hover {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+

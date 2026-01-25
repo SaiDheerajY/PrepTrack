@@ -7,22 +7,50 @@
     <link rel = "stylesheet" href="style.css"/>
 </head>
 <body>
-    <main class="container">
-        <header class="header">
-            <h1>PrepTrack</h1>
-            <p class="tagline">Track your placement preparation</p>
-        </header>
-        <section class="card">
-            <h2>Today</h2>
-            <li>Solve 2 Leetcode problems</li>
-            <li>Watch 1 DSA video</li>
-            <li>Check upcoming contests</li>
-        </ul>
-        </section>
-        <section class="actions">
-            <button class="primary">Start Tracking</button>
-        </section>
-    </main>
-    
+<main class="container">
+
+  <!-- HEADER -->
+  <header class="header">
+    <h1>PrepTrack</h1>
+    <p class="tagline">Your placement prep dashboard</p>
+  </header>
+
+  <!-- DASHBOARD GRID -->
+  <section class="dashboard">
+
+    <!-- TASKS SECTION -->
+<div class="card" id="tasks-card">
+  <h2>Tasks</h2>
+
+  <div class="task-input">
+    <input type="text" id="taskInput" placeholder="Add a task..." />
+    <button class="secondary" id="addTaskBtn">Add</button>
+  </div>
+
+  <ul id="taskList"></ul>
+</div>
+
+
+    <!-- VIDEOS SECTION -->
+    <div class="card">
+      <h2>Videos</h2>
+      <p>No videos added yet</p>
+      <button class="secondary">Add Video</button>
+    </div>
+
+    <!-- CONTESTS SECTION -->
+    <div class="card">
+      <h2>Contests</h2>
+      <ul>
+        <li>Codeforces Round – Sunday</li>
+        <li>LeetCode Weekly – Saturday</li>
+      </ul>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>
