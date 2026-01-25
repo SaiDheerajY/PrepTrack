@@ -1,15 +1,53 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Tasks from "./Tasks";
 import Videos from "./Videos";
 import "./App.css";
 import Contests from "./contests";
+import Calendar from "./Calender";
+
 
 function App() {
   const [loaded, setLoaded] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [videos, setVideos] = useState([]);
   const [streak, setStreak] = useState(0);
-  const [dailyLog, setDailyLog] = useState({});
+  const [dailyLog, setDailyLog] = useState(() => {
+  const saved = localStorage.getItem("dailyLog");
+  return saved ? JSON.parse(saved) : {};
+});
+const [leftWidth, setLeftWidth] = useState(
+  Number(localStorage.getItem("leftWidth")) || 60
+);
+const isDragging = useRef(false);
+
+
+useEffect(() => {
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+
+    const newLeftWidth = (e.clientX / window.innerWidth) * 100;
+
+    if (newLeftWidth > 20 && newLeftWidth < 80) {
+      setLeftWidth(newLeftWidth);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging.current) {
+      isDragging.current = false;
+      localStorage.setItem("leftWidth", leftWidth);
+    }
+  };
+
+  window.addEventListener("mousemove", handleMouseMove);
+  window.addEventListener("mouseup", handleMouseUp);
+
+  return () => {
+    window.removeEventListener("mousemove", handleMouseMove);
+    window.removeEventListener("mouseup", handleMouseUp);
+  };
+}, [leftWidth]);
+
 
  function markActivity() {
   const today = new Date().toDateString();
@@ -94,12 +132,20 @@ useEffect(() => {
   useEffect(() => {
   localStorage.setItem("dailyLog", JSON.stringify(dailyLog));
 }, [dailyLog]);
-
-
+useEffect(() => {
+  localStorage.setItem("dailyLog", JSON.stringify(dailyLog));
+}, [dailyLog]);
 
   return (
-  <div className="dashboard">
-    <div className="left-panel">
+  <div
+  className="dashboard"
+  style={{
+    gridTemplateColumns: `${leftWidth}% 6px ${100 - leftWidth}%`
+  }}
+>
+    <div
+    className="left-panel"
+  >
       <Tasks
   tasks={tasks}
   setTasks={setTasks}
@@ -113,24 +159,29 @@ useEffect(() => {
   markActivity={markActivity}
   resetVideos={resetVideos}
 />
+</div>
+<div
+  className="divider"
+  onMouseDown={() => (isDragging.current = true)}
+/>
 
-    </div>
-
-    <div className="right-panel">
-  <Contests />
-
-  <h2>Streak</h2>
-<p>🔥 {streak} day{streak !== 1 ? "s" : ""}</p>
+  <div className="right-panel" >
+  <Calendar dailyLog={dailyLog} />    {/* new */}
+  <Contests />     {/* moved down */}
+  <div className="streak-box">
+    <h2>Streak</h2>
+    <p>🔥 {streak} day</p>
+  </div>
 </div>
 
   </div>
 );
-window.addEventListener("mousemove", (e) => {
-  document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
-  document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
-});
 
 }
+//window.addEventListener("mousemove", (e) => {
+  //document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
+  //document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
+//});
 
 
 export default App;

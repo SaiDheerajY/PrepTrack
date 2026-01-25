@@ -64,10 +64,3 @@ body::after {
    DASHBOARD LAYOUT
 ========================= */
 
-.dashboard {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  padding: 24px;
-  min-height: 100vh;
-}

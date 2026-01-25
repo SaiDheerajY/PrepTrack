@@ -6,6 +6,7 @@ function Tasks({ tasks, setTasks, markActivity,resetTasks }) {
 
   return (
     <div>
+        <h1>PrepTrack.</h1>
       <h2>Tasks</h2>
       <input
         type="text"
