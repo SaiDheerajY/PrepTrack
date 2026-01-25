@@ -32,11 +32,21 @@
 
 
     <!-- VIDEOS SECTION -->
-    <div class="card">
-      <h2>Videos</h2>
-      <p>No videos added yet</p>
-      <button class="secondary">Add Video</button>
-    </div>
+<div class="card" id="videos-card">
+  <h2>Videos</h2>
+
+  <div class="video-input">
+    <input
+      type="text"
+      id="videoInput"
+      placeholder="Paste YouTube video link..."
+    />
+    <button class="secondary" id="addVideoBtn">Add</button>
+  </div>
+
+  <ul id="videoList"></ul>
+</div>
+
 
     <!-- CONTESTS SECTION -->
     <div class="card">

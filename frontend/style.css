@@ -143,7 +143,7 @@ body {
 }
 
 /* Add button */
-.task-input .secondary {
+.secondary {
   position: relative;
   top: -6px;
   height: 30px;                 /* same height as input */
@@ -155,7 +155,7 @@ body {
 }
 
 /* Hover refinement */
-.task-input .secondary:hover {
+.secondary:hover {
   background: var(--muted);
   color: black;
   font-size: medium;
@@ -172,6 +172,22 @@ body {
 #taskList li:hover {
   color: var(--muted);
   text-decoration: line-through;
+}
+.video-input {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.video-input input {
+  flex: 1;
+  height: 32px;
+  background: black;
+  border: 1px solid var(--neon);
+  color: var(--neon);
+  padding: 0 16px;
+  border-radius: 999px;
 }
 
 

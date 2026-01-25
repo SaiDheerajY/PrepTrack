@@ -36,3 +36,50 @@ addTaskBtn.addEventListener("click",() =>{
     renderTasks();
 });
 renderTasks();
+// Video elements
+const videoInput = document.getElementById("videoInput");
+const addVideoBtn = document.getElementById("addVideoBtn");
+const videoList = document.getElementById("videoList");
+
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
+function renderVideos() {
+  videoList.innerHTML = "";
+
+  videos.forEach((video, index) => {
+    const li = document.createElement("li");
+    li.textContent = video.url;
+
+    // If completed, style differently
+    if (video.completed) {
+      li.style.textDecoration = "line-through";
+      li.style.opacity = "0.6";
+    }
+
+    // Toggle completed on click
+    li.addEventListener("click", () => {
+      videos[index].completed = !videos[index].completed;
+      saveVideos();
+      renderVideos();
+    });
+
+    videoList.appendChild(li);
+  });
+}
+function saveVideos() {
+  localStorage.setItem("videos", JSON.stringify(videos));
+}
+addVideoBtn.addEventListener("click", () => {
+  const url = videoInput.value.trim();
+
+  if (url === "") return;
+
+  videos.push({
+    url: url,
+    completed: false
+  });
+
+  videoInput.value = "";
+  saveVideos();
+  renderVideos();
+});
+renderVideos();
