@@ -49,7 +49,6 @@ addTaskBtn.addEventListener("click",() =>{
     saveTasks();
     renderTasks();
 });
-renderTasks();
 // Video elements
 function renderVideos() {
   videoList.innerHTML = "";
@@ -91,10 +90,7 @@ addVideoBtn.addEventListener("click", () => {
   saveVideos();
   renderVideos();
 });
-renderVideos();
 //contests 
-
-// Mock contest data
 function renderContests() {
   upcomingList.innerHTML = "";
   pastList.innerHTML = "";
@@ -113,6 +109,7 @@ function renderContests() {
     }
   });
 }
-
+renderTasks();
+renderVideos();
 renderContests();
 
