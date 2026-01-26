@@ -1,0 +1,53 @@
+.contests-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contest-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 156, 0.25);
+
+  box-shadow: 0 0 20px rgba(0, 255, 156, 0.05);
+}
+
+.contest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contest-name {
+  color: #e6fff5;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.contest-time {
+  font-size: 0.8rem;
+  color: #7fffd4;
+}
+
+.register-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #29d291;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.register-btn:hover {
+  transform: translateY(-1px);
+  border: 3px solid black;
+  box-shadow: 0 0 12px #00ff9c;
+}

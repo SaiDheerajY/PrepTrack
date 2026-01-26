@@ -1,55 +1,72 @@
 import { useState } from "react";
 
-function Calendar({ dailyLog = {} }) {
+function Calendar({ dailyLog }) {
   const today = new Date();
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(today);
   const [showModal, setShowModal] = useState(false);
 
   const year = today.getFullYear();
   const month = today.getMonth();
 
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  const daysInMonth = lastDay.getDate();
+  const startDay = firstDay.getDay();
+
+  function getHeatLevel(log) {
+    if (!log) return 0;
+    const tasks = log.tasksCompleted?.length || 0;
+    const videos = log.videosCompleted?.length || 0;
+    const total = tasks + videos;
+
+    if (total === 0) return 0;
+    if (total <= 2) return 1;
+    if (total <= 5) return 2;
+    return 3;
+  }
+
+  const selectedKey = selectedDate.toDateString();
+  const selectedLog = dailyLog[selectedKey];
 
   const days = [];
 
-  // Empty slots before first day
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    days.push(null);
+  for (let i = 0; i < startDay; i++) {
+    days.push(<div key={`empty-${i}`} />);
   }
 
-  // Actual days
-  for (let d = 1; d <= daysInMonth; d++) {
-    days.push(new Date(year, month, d));
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const key = date.toDateString();
+    const log = dailyLog[key];
+    const heat = getHeatLevel(log);
+
+    days.push(
+      <div
+        key={key}
+        className={`calendar-day heat-${heat} ${
+          key === selectedKey ? "selected" : ""
+        }`}
+        onClick={() => {
+          setSelectedDate(date);
+          setShowModal(true);
+        }}
+      >
+        {day}
+      </div>
+    );
   }
 
   return (
-    <div className="calendar-box">
-      <h2>Calendar</h2>
+    <>
+      <div className="calendar-box">
+        <h2>Calendar</h2>
 
-      <div className="calendar-grid">
-        {days.map((date, index) => {
-          if (!date) return <div key={index} />;
+        <div className="calendar-grid">{days}</div>
 
-          const dateStr = date.toDateString();
-          const hasActivity = dailyLog?.[dateStr];
-
-          return (
-            <div
-              key={index}
-              className={`calendar-cell ${
-                selectedDate === dateStr ? "active" : ""
-              }`}
-              onClick={() => {
-                setSelectedDate(dateStr);
-                setShowModal(true);
-              }}
-            >
-              {date.getDate()}
-              {hasActivity && <span className="dot" />}
-            </div>
-          );
-        })}
+        <div className="calendar-details">
+          <p>{selectedDate.toDateString()}</p>
+        </div>
       </div>
 
       {/* MODAL */}
@@ -62,12 +79,12 @@ function Calendar({ dailyLog = {} }) {
             className="modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>{selectedDate}</h2>
+            <h2>{selectedDate.toDateString()}</h2>
 
             <h3>Tasks completed</h3>
-            {dailyLog[selectedDate]?.tasksCompleted?.length ? (
+            {selectedLog?.tasksCompleted?.length ? (
               <ul>
-                {dailyLog[selectedDate].tasksCompleted.map((task, i) => (
+                {selectedLog.tasksCompleted.map((task, i) => (
                   <li key={i}>{task}</li>
                 ))}
               </ul>
@@ -76,9 +93,9 @@ function Calendar({ dailyLog = {} }) {
             )}
 
             <h3>Videos watched</h3>
-            {dailyLog[selectedDate]?.videosCompleted?.length ? (
+            {selectedLog?.videosCompleted?.length ? (
               <ul>
-                {dailyLog[selectedDate].videosCompleted.map((video, i) => (
+                {selectedLog.videosCompleted.map((video, i) => (
                   <li key={i}>{video}</li>
                 ))}
               </ul>
@@ -95,7 +112,7 @@ function Calendar({ dailyLog = {} }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

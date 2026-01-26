@@ -151,6 +151,11 @@ li.completed {
   border-radius: 12px;
 
   box-shadow: none;
+  width: fit-content;    /* Stops it from stretching to full width */
+  margin-top: 3px;
+  width: fit-content;    /* Prevents it from getting too wide */
+  height: fit-content;   /* Prevents it from getting too tall */
+  align-self: center;
 }
 
 .reset-btn:hover {
@@ -195,47 +200,109 @@ li.completed {
    CALENDAR GRID
 ========================= */
 
+
+.calendar-box {
+  background: transparent;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 255, 156, 0.15);
+  box-shadow: 0 0 20px rgba(0, 255, 156, 0.05);
+}
+
+.calendar-box h2 {
+  margin-bottom: 12px;
+  color: var(--neon);
+  font-size: 1.2rem;
+}
+
+/* =========================
+   CALENDAR GRID
+========================= */
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
 }
 
-.calendar-cell {
-  height: 34px;
+/* =========================
+   CALENDAR DAY CELL
+========================= */
+
+.calendar-day {
+  height: 36px;
+  border-radius: 10px;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 6px;
   cursor: pointer;
-  position: relative;
+  user-select: none;
 
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: var(--text-main);
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
 }
 
-.calendar-cell:hover {
-  border-radius: 50%;         /* Makes it a circle */
-  aspect-ratio: 1 / 1;
-  background: rgba(0, 255, 156, 0.1);
+.calendar-day:hover {
+  border-radius: 99px;
+  transform: translateY(-2px); /* Slight lift */
+  background: rgba(4, 119, 80, 0.25); /* Default hover for heat-0 */
+  z-index: 2; /* Ensures shadow stays above neighbors */
 }
 
-.calendar-cell.active {
-  border-radius: 50%;         /* Makes it a circle */
-  aspect-ratio: 1 / 1;
-  background: var(--neon);
+/* =========================
+   HEATMAP LEVELS
+========================= */
+
+.heat-0 {
+  background: transparent;
+}
+
+.heat-1 {
+  background: rgba(0, 255, 156, 0.15);
+}
+
+.heat-2 {
+  background: rgba(0, 255, 156, 0.35);
+  box-shadow: 0 0 6px rgba(0, 255, 156, 0.35);
+}
+
+.heat-3 {
+  background: rgba(0, 255, 156, 0.75);
+  box-shadow: 0 0 14px rgba(0, 255, 156, 0.65);
   color: #000;
   font-weight: 600;
 }
 
-.calendar-cell .dot {
-  width: 6px;
-  height: 6px;
-  background: var(--neon);
-  border-radius: 50%;
-  position: absolute;
-  bottom: 4px;
+/* =========================
+   SELECTED DAY
+========================= */
+
+.calendar-day.selected {
+  outline: 1px solid var(--neon);
+  background-color: var(--neon);
+  color: #000;
+  font-weight: bold;
+  border-radius: 99px;
+}
+
+/* =========================
+   CALENDAR DETAILS (BELOW GRID)
+========================= */
+
+.calendar-details {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* =========================
@@ -303,7 +370,7 @@ li.completed {
 }
 
 .modal {
-  background: #000;
+  background: #000000;
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px;
@@ -341,7 +408,7 @@ li.completed {
   flex-direction: column;
   gap: 12px;
   /* Adjust this width to control how large the video appears in the panel */
-  width: 300px;  
+  width: 100%;  
   margin-top: 20px;
   margin-bottom: 20px;
 }
@@ -358,6 +425,101 @@ li.completed {
   background: var(--neon);
   transition: width 0.3s ease;
 }
+.video-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: #ff5c5c;
+  cursor: pointer;
+  font-size: 1rem;
+}
+/* =========================
+   DYNAMIC SECTIONS (Tasks/Videos)
+========================= */
 
+.section-container {
+  margin-left: 20px;   /* The left margin you requested */
+  width: 90%;          /* Dynamic width */
+  max-width: 400px;    /* Stops it from getting too huge */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.input-group input {
+  flex: 1; /* Input stretches to fill space */
+}
+
+/* Ensure the title aligns with the new margin */
+h1 {
+  margin-left: 20px; /* Aligns "PrepTrack." with the containers */
+}
+/* =========================
+   PRIORITY STYLES
+========================= */
+
+/* The Dropdown Selector */
+.priority-select {
+  background: #000;
+  color: var(--text-main, #fff);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 0 10px;
+  cursor: pointer;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.priority-select:focus {
+  border-color: var(--neon, #00ff9c);
+}
+
+/* Priority Dots (for Tasks) */
+.priority-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.priority-dot.high { background-color: #ff4d4d; box-shadow: 0 0 5px #ff4d4d; }
+.priority-dot.medium { background-color: #ffcc00; }
+.priority-dot.low { background-color: #888; }
+
+/* Priority Badges (for Videos) */
+.priority-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #000; /* Black text for contrast */
+}
+
+.priority-badge.high { background-color: #ff4d4d; }
+.priority-badge.medium { background-color: #ffcc00; }
+.priority-badge.low { background-color: #ccc; }
+/*fire streak*/
+.fire-icon {
+  font-size: 1.5rem;
+  
+  /* THE MAGIC: Grayscale the emoji then tint it Green */
+  filter: grayscale(100%) sepia(100%) hue-rotate(90deg) saturate(500%);
+  
+  animation: flicker 2s infinite alternate;
+}
 

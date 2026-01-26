@@ -1,0 +1,140 @@
+.cf-card {
+  /* Fixed size and centering */
+  width: 320px;
+  margin: 5px ; /* Centers the card horizontally if inside a block */
+  
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 255, 156, 0.25);
+  background: rgba(0, 0, 0, 0.8); /* Slightly darker for contrast */
+  color: #fff;
+  font-family: sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.cf-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  text-align: center;
+  color: #fff;
+}
+
+/* Input Section */
+.cf-input {
+  display: flex;
+  gap: 8px;
+}
+
+.cf-input input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  outline: none;
+}
+
+.cf-input input:focus {
+  border-color: var(--neon, #00ff9c);
+}
+
+.cf-input button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--neon, #00ff9c);
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.cf-input button:hover {
+  opacity: 0.9;
+}
+
+/* Profile Section */
+.cf-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align text */
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.cf-handle {
+  color: var(--neon, #00ff9c);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cf-rating {
+  font-size: 1.1rem;
+  color: #fff;
+  margin: 0;
+}
+
+.cf-rank {
+  font-size: 0.9rem;
+  color: #aaa; /* Fallback for --text-muted */
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.cf-max {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* Links and Action Buttons */
+.cf-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.cf-btn-link, .cf-btn-reset {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.cf-btn-link {
+  background: rgba(0, 255, 156, 0.15);
+  color: var(--neon, #00ff9c);
+}
+
+.cf-btn-link:hover {
+  background: rgba(0, 255, 156, 0.25);
+}
+
+.cf-btn-reset {
+  background: #333;
+  color: #ccc;
+}
+
+.cf-btn-reset:hover {
+  background: #444;
+  color: #fff;
+}
+
+.muted {
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+}

@@ -3,29 +3,45 @@ import { useState } from "react";
 
 function Videos({ videos, setVideos, markActivity, resetVideos }) {
   const [input, setInput] = useState("");
+  const [priority, setPriority] = useState("Medium");
 
-async function addVideo() {
-  const id = extractVideoId(input);
-  if (!id) return;
+  const getPriorityWeight = (p) => {
+    const safePriority = p || "Medium";
+    if (safePriority === "High") return 3;
+    if (safePriority === "Medium") return 2;
+    return 1;
+  };
 
-  const title = await fetchVideoTitle(id);
+  const sortedVideos = [...videos].sort(
+    (a, b) => getPriorityWeight(b.priority) - getPriorityWeight(a.priority)
+  );
 
-  setVideos([
-    ...videos,
-    {
-      id,
-      title,
-      progress: 0,
-      completed: false
-    }
-  ]);
+  async function addVideo() {
+    const id = extractVideoId(input);
+    if (!id) return;
 
-  setInput("");
-}
-function deleteVideo(index) {
-  setVideos(videos.filter((_, i) => i !== index));
-}
-  function onStateChange(event, index) {
+    const title = await fetchVideoTitle(id);
+
+    setVideos([
+      ...videos,
+      {
+        id,
+        title,
+        priority, 
+        progress: 0,
+        completed: false,
+      },
+    ]);
+
+    setInput("");
+    setPriority("Medium");
+  }
+
+  function deleteVideo(targetVideo) {
+    setVideos(videos.filter((v) => v !== targetVideo));
+  }
+
+  function onStateChange(event, index, originalVideo) {
     const player = event.target;
 
     const interval = setInterval(() => {
@@ -36,13 +52,13 @@ function deleteVideo(index) {
 
       const percent = Math.floor((current / duration) * 100);
 
-      setVideos(prev =>
-        prev.map((v, i) =>
-          i === index
+      setVideos((prev) =>
+        prev.map((v) =>
+          v === originalVideo 
             ? {
                 ...v,
                 progress: percent,
-                completed: percent >= 90
+                completed: percent >= 90,
               }
             : v
         )
@@ -56,26 +72,38 @@ function deleteVideo(index) {
   }
 
   return (
-    <div>
+    <div className="section-container">
       <h2>Videos</h2>
 
-      <input
-        placeholder="Paste YouTube link..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      />
+      <div className="input-group">
+        <input
+          placeholder="Paste YouTube link..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        
+        <select
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+          className="priority-select"
+        >
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
 
-      <button onClick={addVideo}>Add</button>
-      <button className="reset-btn" onClick={resetVideos}>
-        Reset Videos
-      </button>
+        <button onClick={addVideo}>Add</button>
+        <button className="reset-btn" onClick={resetVideos}>
+          Reset
+        </button>
+      </div>
 
-      {videos.map((video, index) => (
-        <div key={video.id} className="video-card">
+      {sortedVideos.map((video) => (
+        <div key={video.id + video.title} className="video-card">
           <YouTube
             videoId={video.id}
-            onStateChange={(e) => onStateChange(e, index)}
-            opts={{ width: "100%", height: "100%" }}
+            onStateChange={(e) => onStateChange(e, null, video)}
+            opts={{ width: "100%", height: "200px" }}
           />
 
           <div className="progress-bar">
@@ -85,18 +113,18 @@ function deleteVideo(index) {
             />
           </div>
           <div className="video-header">
-  <span className={video.completed ? "completed" : ""}>
-    {video.title}
-  </span>
+            <span className={video.completed ? "completed" : ""}>
+               {/* FIX: Safety check for existing videos */}
+              <span className={`priority-badge ${(video.priority || "Medium").toLowerCase()}`}>
+                {video.priority || "Medium"}
+              </span>{" "}
+              {video.title}
+            </span>
 
-  <button
-    className="delete-btn"
-    onClick={() => deleteVideo(index)}
-  >
-    ✕
-  </button>
-</div>
-
+            <button className="delete-btn" onClick={() => deleteVideo(video)}>
+              ✕
+            </button>
+          </div>
 
           <p>{video.progress}% watched</p>
         </div>
@@ -104,12 +132,12 @@ function deleteVideo(index) {
     </div>
   );
 }
+
 function extractVideoId(url) {
-  const match = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/
-  );
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
   return match ? match[1] : null;
 }
+
 async function fetchVideoTitle(videoId) {
   const res = await fetch(
     `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
@@ -117,7 +145,5 @@ async function fetchVideoTitle(videoId) {
   const data = await res.json();
   return data.title.split(" ").slice(0, 6).join(" ");
 }
-
-
 
 export default Videos;

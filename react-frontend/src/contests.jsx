@@ -1,43 +1,70 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import "./contests.css";
+
 function Contests() {
-  const contests = [
-    { name: "LeetCode Weekly 390", date: "2026-02-02" },
-    { name: "Codeforces Round 950", date: "2026-01-30" },
-    { name: "LeetCode Biweekly 120", date: "2026-01-15" },
-    { name: "LeetCode Biweekly 122", date: "2026-01-27" }
-  ];
+  const [contests, setContests] = useState([]);
+  const [now, setNow] = useState(Date.now());
 
-  const today = new Date();
+  // Tick every minute for countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const upcoming = contests.filter(
-    (contest) => new Date(contest.date) >= today
-  );
+  useEffect(() => {
+  fetch("http://localhost:5000/api/codeforces/contests")
+    .then(res => res.json())
+    .then(data => {
+      const now = Date.now();
+      const fiveDaysLater = now + 5 * 24 * 60 * 60 * 1000;
 
-  const past = contests.filter(
-    (contest) => new Date(contest.date) < today
-  );
+      const upcoming = (data.result || []).filter(contest => {
+        const startTime = contest.startTimeSeconds * 1000;
+        return startTime >= now && startTime <= fiveDaysLater;
+      });
+
+      setContests(upcoming);
+    })
+    .catch(err => console.error(err));
+}, []);
+
+  const formatCountdown = (startSeconds) => {
+    const diff = startSeconds * 1000 - now;
+    if (diff <= 0) return "Started";
+
+    const minutes = Math.floor(diff / 60000);
+    const days = Math.floor(minutes / (60 * 24));
+    const hours = Math.floor((minutes % (60 * 24)) / 60);
+    const mins = minutes % 60;
+
+    return `${days}d ${hours}h ${mins}m`;
+  };
 
   return (
-    <div>
-      <h2>Contests</h2>
+    <div className="contests-box">
+      <h2>Codeforces Contests</h2>
 
-      <h3>Upcoming</h3>
-      <ul>
-        {upcoming.map((contest, index) => (
-          <li key={index}>
-            {contest.name} — {contest.date}
-          </li>
-        ))}
-      </ul>
+      {contests.map(contest => (
+        <div key={contest.id} className="contest-card">
+          <div className="contest-info">
+            <span className="contest-name">{contest.name}</span>
+            <span className="contest-time">
+              ⏳ {formatCountdown(contest.startTimeSeconds)}
+            </span>
+          </div>
 
-      <h3>Past</h3>
-      <ul>
-        {past.map((contest, index) => (
-          <li key={index}>
-            {contest.name} — {contest.date}
-          </li>
-        ))}
-      </ul>
+          <a
+            href={`https://codeforces.com/contest/${contest.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="register-btn"
+          >
+            Register
+          </a>
+        </div>
+      ))}
     </div>
   );
 }

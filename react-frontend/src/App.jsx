@@ -4,6 +4,8 @@ import Videos from "./Videos";
 import "./App.css";
 import Contests from "./contests";
 import Calendar from "./Calender";
+import CodeforcesProfile from "./codeforcesprofile";
+
 
 
 function App() {
@@ -65,13 +67,26 @@ function resetTasks() {
     .filter(t => t.completed)
     .map(t => t.text);
 
-  setDailyLog(prev => ({
-    ...prev,
-    [today]: {
-      ...(prev[today] || {}),
-      tasksCompleted: completedTasks
-    }
-  }));
+  if (completedTasks.length === 0) {
+    setTasks([]);
+    return;
+  }
+
+  setDailyLog(prev => {
+    const previousTasks =
+      prev[today]?.tasksCompleted || [];
+
+    return {
+      ...prev,
+      [today]: {
+        ...prev[today],
+        tasksCompleted:[...new Set( [
+          ...previousTasks,
+          ...completedTasks
+        ])]
+      }
+    };
+  });
 
   setTasks([]);
 }
@@ -87,13 +102,21 @@ function resetVideos() {
     return;
   }
 
-  setDailyLog(prev => ({
-    ...prev,
-    [today]: {
-      ...(prev[today] || {}),
-      videosCompleted: completedVideos
-    }
-  }));
+  setDailyLog(prev => {
+    const previousVideos =
+      prev[today]?.videosCompleted || [];
+
+    return {
+      ...prev,
+      [today]: {
+        ...prev[today],
+        videosCompleted: [
+          ...previousVideos,
+          ...completedVideos
+        ]
+      }
+    };
+  });
 
   setVideos([]);
 }
@@ -161,6 +184,8 @@ useEffect(() => {
   markActivity={markActivity}
   resetVideos={resetVideos}
 />
+<br></br>
+<CodeforcesProfile />
 </div>
 <div
   className="divider"
@@ -173,7 +198,7 @@ useEffect(() => {
   <Contests />     {/* moved down */}
   <div className="streak-box">
     <h2>Streak</h2>
-    <p>🔥 {streak} day</p>
+    <p><span className="fire-icon">🔥</span> {streak} day</p>
   </div>
 </div>
 
