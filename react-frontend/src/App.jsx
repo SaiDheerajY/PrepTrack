@@ -166,6 +166,9 @@ function Dashboard() {
         <div className="brand-text">
           PREPTRACK :: STREAK[<span className="highlight-green">{streak}</span>]
         </div>
+        <Link to="/pomodoro" className="nav-link" style={{ color: '#00ff9c', textDecoration: 'none' }}>
+          {`[ >> POMODORO_TIMER ]`}
+        </Link>
         <div className="user-status">
           USER: {currentUser?.email}
           <button className="text-btn" onClick={async () => {
@@ -208,10 +211,6 @@ function Dashboard() {
           <button className="text-btn" onClick={logout} style={{ marginLeft: '10px' }}>
             [ TERMINATE_SESSION ]
           </button>
-
-          <Link to="/pomodoro" className="nav-link" style={{ marginLeft: '20px', color: '#00ff9c', textDecoration: 'none' }}>
-            {`[ >> POMODORO_TIMER ]`}
-          </Link>
         </div>
       </div>
 
