@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Calendar({ dailyLog }) {
+function Calendar({ dailyLog = {} }) {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(today);
   const [showModal, setShowModal] = useState(false);
@@ -27,7 +27,7 @@ function Calendar({ dailyLog }) {
   }
 
   const selectedKey = selectedDate.toDateString();
-  const selectedLog = dailyLog[selectedKey];
+  const selectedLog = dailyLog?.[selectedKey];
 
   const days = [];
 
@@ -44,9 +44,8 @@ function Calendar({ dailyLog }) {
     days.push(
       <div
         key={key}
-        className={`calendar-day heat-${heat} ${
-          key === selectedKey ? "selected" : ""
-        }`}
+        className={`calendar-day heat-${heat} ${key === selectedKey ? "selected" : ""
+          }`}
         onClick={() => {
           setSelectedDate(date);
           setShowModal(true);

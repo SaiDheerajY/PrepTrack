@@ -1,16 +1,15 @@
 import YouTube from "react-youtube";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
-function Videos({ videos, setVideos, markActivity, resetVideos }) {
+function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVideo }) {
   const [input, setInput] = useState("");
   const [priority, setPriority] = useState("Medium");
 
-  const getPriorityWeight = (p) => {
-    const safePriority = p || "Medium";
-    if (safePriority === "High") return 3;
-    if (safePriority === "Medium") return 2;
-    return 1;
-  };
+  // Track active intervals per video ID
+  const intervalsRef = useRef({});
+
+  const getPriorityWeight = (p = "Medium") =>
+    p === "High" ? 3 : p === "Medium" ? 2 : 1;
 
   const sortedVideos = [...videos].sort(
     (a, b) => getPriorityWeight(b.priority) - getPriorityWeight(a.priority)
@@ -18,57 +17,84 @@ function Videos({ videos, setVideos, markActivity, resetVideos }) {
 
   async function addVideo() {
     const id = extractVideoId(input);
-    if (!id) return;
+    if (!id) {
+      alert("Invalid YouTube URL");
+      return;
+    }
 
-    const title = await fetchVideoTitle(id);
+    try {
+      const title = await fetchVideoTitle(id);
 
-    setVideos([
-      ...videos,
-      {
-        id,
-        title,
-        priority, 
-        progress: 0,
-        completed: false,
-      },
-    ]);
+      setVideos((prev) => [
+        ...prev,
+        {
+          id,
+          title: title || "Video",
+          priority,
+          progress: 0,
+          completed: false,
+        },
+      ]);
 
-    setInput("");
-    setPriority("Medium");
+      setInput("");
+      setPriority("Medium");
+    } catch (error) {
+      console.error("Error adding video:", error);
+      alert("Failed to add video");
+    }
   }
 
-  function deleteVideo(targetVideo) {
-    setVideos(videos.filter((v) => v !== targetVideo));
+  function deleteVideo(video) {
+    // Clear interval if exists
+    if (intervalsRef.current[video.id]) {
+      clearInterval(intervalsRef.current[video.id]);
+      delete intervalsRef.current[video.id];
+    }
+
+    // Call parent handler if available, else local (fallback)
+    if (onDeleteVideo) {
+      onDeleteVideo(video);
+    } else {
+      setVideos((prev) => prev.filter((v) => v.id !== video.id));
+    }
   }
 
-  function onStateChange(event, index, originalVideo) {
+  function onStateChange(event, video) {
+    // Only start tracking when PLAYING
+    if (event.data !== 1) return;
+
+    // Prevent duplicate intervals
+    if (intervalsRef.current[video.id]) return;
+
     const player = event.target;
 
     const interval = setInterval(() => {
       const current = player.getCurrentTime();
       const duration = player.getDuration();
-
       if (!duration) return;
 
       const percent = Math.floor((current / duration) * 100);
 
       setVideos((prev) =>
         prev.map((v) =>
-          v === originalVideo 
+          v.id === video.id
             ? {
-                ...v,
-                progress: percent,
-                completed: percent >= 90,
-              }
+              ...v,
+              progress: percent,
+              completed: percent >= 90,
+            }
             : v
         )
       );
 
       if (percent >= 90) {
-        markActivity();
+        markActivity?.();
         clearInterval(interval);
+        delete intervalsRef.current[video.id];
       }
     }, 1000);
+
+    intervalsRef.current[video.id] = interval;
   }
 
   return (
@@ -81,7 +107,7 @@ function Videos({ videos, setVideos, markActivity, resetVideos }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        
+
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
@@ -99,12 +125,21 @@ function Videos({ videos, setVideos, markActivity, resetVideos }) {
       </div>
 
       {sortedVideos.map((video) => (
-        <div key={video.id + video.title} className="video-card">
+        <div key={video.id} className="video-card">
           <YouTube
             videoId={video.id}
-            onStateChange={(e) => onStateChange(e, null, video)}
-            opts={{ width: "100%", height: "200px" }}
+            opts={{
+              width: "100%",
+              height: "220",
+              playerVars: {
+                autoplay: 0,
+                controls: 1,
+                modestbranding: 1,
+              },
+            }}
+            onStateChange={(e) => onStateChange(e, video)}
           />
+
 
           <div className="progress-bar">
             <div
@@ -112,16 +147,21 @@ function Videos({ videos, setVideos, markActivity, resetVideos }) {
               style={{ width: `${video.progress}%` }}
             />
           </div>
+
           <div className="video-header">
             <span className={video.completed ? "completed" : ""}>
-               {/* FIX: Safety check for existing videos */}
-              <span className={`priority-badge ${(video.priority || "Medium").toLowerCase()}`}>
-                {video.priority || "Medium"}
+              <span
+                className={`priority-badge ${video.priority.toLowerCase()}`}
+              >
+                {video.priority}
               </span>{" "}
               {video.title}
             </span>
 
-            <button className="delete-btn" onClick={() => deleteVideo(video)}>
+            <button
+              className="delete-btn"
+              onClick={() => deleteVideo(video)}
+            >
               ✕
             </button>
           </div>
@@ -139,11 +179,17 @@ function extractVideoId(url) {
 }
 
 async function fetchVideoTitle(videoId) {
-  const res = await fetch(
-    `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
-  );
-  const data = await res.json();
-  return data.title.split(" ").slice(0, 6).join(" ");
+  try {
+    // noembed.com is more CORS-friendly
+    const res = await fetch(
+      `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`
+    );
+    const data = await res.json();
+    return data.title ? data.title.split(" ").slice(0, 6).join(" ") : "Unknown Title";
+  } catch (error) {
+    console.error("Failed to fetch video title:", error);
+    return "Video " + videoId;
+  }
 }
 
 export default Videos;

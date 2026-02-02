@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-function Tasks({ tasks, setTasks, markActivity, resetTasks }) {
+function Tasks({ tasks = [], setTasks, markActivity, resetTasks }) {
   const [taskInput, setTaskInput] = useState("");
-  const [priority, setPriority] = useState("Medium"); 
+  const [priority, setPriority] = useState("Medium");
 
   const getPriorityWeight = (p) => {
     // Safety check: if p is undefined, treat as Medium
@@ -48,7 +48,7 @@ function Tasks({ tasks, setTasks, markActivity, resetTasks }) {
           onChange={(e) => setTaskInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
         />
-        
+
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}

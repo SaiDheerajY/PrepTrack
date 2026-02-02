@@ -1,105 +1,104 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import "./CodeforcesProfile.css";
 
-function CodeforcesProfile() {
-  const [handle, setHandle] = useState(
-    localStorage.getItem("cfHandle") || ""
-  );
-  const [input, setInput] = useState("");
+export default function CodeforcesProfile() {
+  const [handle, setHandle] = useState(() => localStorage.getItem("cf_handle") || "");
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (handle && !profile) {
+      loadProfile();
+    }
+  }, []);
+
+  const loadProfile = async () => {
     if (!handle) return;
-
     setLoading(true);
-    setError(null); // Clear previous errors
-    
-    fetch(`http://localhost:5000/api/codeforces/user/${handle}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "OK") {
-          setProfile(data.result[0]);
-          localStorage.setItem("cfHandle", handle);
-        } else {
-            setError("User not found");
-            setProfile(null);
-        }
-      })
-      .catch((err) => {
-          setError("Network Error");
-          console.error(err);
-      })
-      .finally(() => setLoading(false));
-  }, [handle]);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:5000/api/codeforces/user/${handle}`);
+      const data = await response.json();
 
-  // Function to reset the view to search again
-  const resetProfile = () => {
-    setHandle("");
-    setProfile(null);
-    setInput("");
-    localStorage.removeItem("cfHandle"); // Optional: clear storage if you prefer
+      if (data.status === "OK") {
+        setProfile(data.result[0]);
+        localStorage.setItem("cf_handle", handle);
+      } else {
+        setError(data.comment || "User not found");
+      }
+    } catch (err) {
+      setError("Failed to fetch profile");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSearch = () => {
-      if(input.trim()) {
-          setHandle(input);
-      }
-  }
+  const handleReset = () => {
+    setHandle("");
+    setProfile(null);
+    setError(null);
+    localStorage.removeItem("cf_handle");
+  };
+
+  const getRankColor = (rank) => {
+    if (!rank) return "gray";
+    if (rank.includes("grandmaster")) return "red"; // legendary GM is usually red/black
+    if (rank.includes("master")) return "orange";
+    if (rank.includes("candidate user")) return "violet"; // correction: candidate master is violet/purple
+    if (rank.includes("expert")) return "blue";
+    if (rank.includes("specialist")) return "cyan";
+    if (rank.includes("pupil")) return "green";
+    if (rank.includes("newbie")) return "#888888"; // distinct gray
+    return "#ffffff";
+  };
 
   return (
-    <div className="cf-card">
-      <h2>Codeforces Stats</h2>
-
-      {/* Show Input if no profile is loaded */}
-      {!profile && !loading && (
-        <div className="cf-input">
-          <input
-            placeholder="Enter CF handle..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          />
-          <button onClick={handleSearch}>Load</button>
+    <div className="cf-profile-card">
+      <h3>Codeforces Profile</h3>
+      <div className="cf-input-group">
+        <input
+          type="text"
+          value={handle}
+          onChange={(e) => setHandle(e.target.value)}
+          placeholder="Enter handle"
+        />
+        <div className="cf-button-row">
+          <button onClick={loadProfile} disabled={loading || !handle}>
+            {loading ? "..." : "Load"}
+          </button>
+          <button className="reset-btn" onClick={handleReset}>
+            Reset
+          </button>
         </div>
-      )}
+      </div>
 
-      {loading && <p className="muted">Fetching data...</p>}
-      
-      {error && !loading && (
-          <div style={{textAlign: 'center'}}>
-              <p style={{color: '#ff4d4d'}}>{error}</p>
-              <button className="cf-btn-reset" onClick={() => setError(null)}>Try Again</button>
+      {error && <p className="error-text">{error}</p>}
+
+      {profile && (
+        <div className="cf-stats">
+          <div className="cf-header">
+            <img src={profile.titlePhoto} alt="avatar" className="cf-avatar" />
+            <div className="cf-info-main">
+              <div className="cf-handle" style={{ color: getRankColor(profile.rank) }}>
+                {profile.handle}
+              </div>
+              <div className="cf-rank">{profile.rank}</div>
+              <div className="cf-decor">SYSTEM_USER :: {profile.country || "GLOBAL"}</div>
+            </div>
           </div>
-      )}
-
-      {/* Show Profile if data exists */}
-      {profile && !loading && (
-        <div className="cf-profile">
-          <p className="cf-handle">@{profile.handle}</p>
-          <p className="cf-rating">⭐ {profile.rating || "Unrated"}</p>
-          <p className="cf-rank">{profile.rank}</p>
-          <p className="cf-max">Max: {profile.maxRating}</p>
-
-          <div className="cf-actions">
-            <a
-              href={`https://codeforces.com/profile/${profile.handle}`}
-              target="_blank"
-              rel="noreferrer"
-              className="cf-btn-link"
-            >
-              Profile ↗
-            </a>
-            
-            <button className="cf-btn-reset" onClick={resetProfile}>
-              Search Again
-            </button>
+          <div className="cf-ratings">
+            <div className="rating-box">
+              <span>Rating</span>
+              <strong>{profile.rating}</strong>
+            </div>
+            <div className="rating-box">
+              <span>Max</span>
+              <strong>{profile.maxRating}</strong>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-
-export default CodeforcesProfile;

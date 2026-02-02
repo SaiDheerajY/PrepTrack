@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "./contests.css";
+import { getMessaging, getToken } from "firebase/messaging";
+import { app } from "./firebase"; // your firebase init
 
 function Contests() {
   const [contests, setContests] = useState([]);
@@ -14,21 +16,21 @@ function Contests() {
   }, []);
 
   useEffect(() => {
-  fetch("http://localhost:5000/api/codeforces/contests")
-    .then(res => res.json())
-    .then(data => {
-      const now = Date.now();
-      const fiveDaysLater = now + 5 * 24 * 60 * 60 * 1000;
+    fetch("http://localhost:5000/api/codeforces/contests")
+      .then(res => res.json())
+      .then(data => {
+        const now = Date.now();
+        const SixDaysLater = now + 6 * 24 * 60 * 60 * 1000;
 
-      const upcoming = (data.result || []).filter(contest => {
-        const startTime = contest.startTimeSeconds * 1000;
-        return startTime >= now && startTime <= fiveDaysLater;
-      });
+        const upcoming = (data.result || []).filter(contest => {
+          const startTime = contest.startTimeSeconds * 1000;
+          return startTime >= now && startTime <= SixDaysLater;
+        });
 
-      setContests(upcoming);
-    })
-    .catch(err => console.error(err));
-}, []);
+        setContests(upcoming);
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const formatCountdown = (startSeconds) => {
     const diff = startSeconds * 1000 - now;
@@ -41,6 +43,7 @@ function Contests() {
 
     return `${days}d ${hours}h ${mins}m`;
   };
+
 
   return (
     <div className="contests-box">

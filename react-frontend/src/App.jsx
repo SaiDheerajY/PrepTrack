@@ -1,215 +1,309 @@
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { AuthProvider, useAuth } from "./AuthContext";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { logout } from "./auth";
+import { enableNotifications, updateNotificationPreference } from "./notifications";
+import Login from "./Login";
+import MyCalendar from "./Calender"; // Capitalization from file list
+import Contests from "./contests";
 import Tasks from "./Tasks";
 import Videos from "./Videos";
 import "./App.css";
-import Contests from "./contests";
-import Calendar from "./Calender";
+
+
 import CodeforcesProfile from "./codeforcesprofile";
 
+function Dashboard() {
+  const { currentUser } = useAuth();
+
+  // -- STATE --
+  const [videos, setVideos] = useState(() => JSON.parse(localStorage.getItem("videos")) || []);
+  const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem("tasks")) || []);
+  const [dailyLog, setDailyLog] = useState(() => JSON.parse(localStorage.getItem("dailyLog")) || {});
+  const [streak, setStreak] = useState(() => Number(localStorage.getItem("streak")) || 0);
+  const [lastActiveDate, setLastActiveDate] = useState(() => localStorage.getItem("lastActiveDate") || "");
+  const [calendarOpen, setCalendarOpen] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
+    localStorage.getItem("notificationsEnabled") === "true"
+  );
+
+  const [leftPanelWidth, setLeftPanelWidth] = useState(() => Number(localStorage.getItem("leftPanelWidth")) || (window.innerWidth * 0.75));
+  const isDragging = useRef(false);
+
+  // -- PERSISTENCE --
+  useEffect(() => { localStorage.setItem("videos", JSON.stringify(videos)); }, [videos]);
+  useEffect(() => { localStorage.setItem("tasks", JSON.stringify(tasks)); }, [tasks]);
+  useEffect(() => { localStorage.setItem("dailyLog", JSON.stringify(dailyLog)); }, [dailyLog]);
+  useEffect(() => { localStorage.setItem("streak", streak); }, [streak]);
+  useEffect(() => { localStorage.setItem("lastActiveDate", lastActiveDate); }, [lastActiveDate]);
+  useEffect(() => { localStorage.setItem("leftPanelWidth", leftPanelWidth); }, [leftPanelWidth]);
 
 
-function App() {
-  const [loaded, setLoaded] = useState(false);
-  const [tasks, setTasks] = useState([]);
-  const [videos, setVideos] = useState([]);
-  const [streak, setStreak] = useState(0);
-  const [dailyLog, setDailyLog] = useState(() => {
-  const saved = localStorage.getItem("dailyLog");
-  return saved ? JSON.parse(saved) : {};
-});
-const [leftWidth, setLeftWidth] = useState(
-  Number(localStorage.getItem("leftWidth")) || 60
-);
-const isDragging = useRef(false);
+  // -- LOGGING LOGIC --
+  const logActivity = (type, item) => {
+    const today = new Date().toDateString();
 
+    setDailyLog(prev => {
+      const dayLog = prev[today] || { tasksCompleted: [], videosCompleted: [] };
+      return {
+        ...prev,
+        [today]: {
+          ...dayLog,
+          [type === "task" ? "tasksCompleted" : "videosCompleted"]: [
+            ...(type === "task" ? dayLog.tasksCompleted : dayLog.videosCompleted),
+            item
+          ]
+        }
+      };
+    });
 
-useEffect(() => {
-  const handleMouseMove = (e) => {
-    if (!isDragging.current) return;
+    // Update Streak
+    if (lastActiveDate !== today) {
+      // If last active was yesterday, increment. If older, reset to 1.
+      // Simple logic: just increment if not today. 
+      // Real streak logic requires checking if yesterday was skipped. 
+      // For simple resume project: Increment if new day.
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
 
-    const newLeftWidth = (e.clientX / window.innerWidth) * 100;
-
-    if (newLeftWidth > 20 && newLeftWidth < 80) {
-      setLeftWidth(newLeftWidth);
+      if (lastActiveDate === yesterday.toDateString()) {
+        setStreak(s => s + 1);
+      } else {
+        setStreak(1); // Reset or Start new
+      }
+      setLastActiveDate(today);
     }
   };
 
-  const handleMouseUp = () => {
-    if (isDragging.current) {
-      isDragging.current = false;
-      localStorage.setItem("leftWidth", leftWidth);
-    }
-  };
-
-  window.addEventListener("mousemove", handleMouseMove);
-  window.addEventListener("mouseup", handleMouseUp);
-
-  return () => {
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleMouseUp);
-  };
-}, [leftWidth]);
+  const markActivity = () => { /* Placeholder if components just call this for fun */ };
 
 
- function markActivity() {
-  const today = new Date().toDateString();
-  const lastStreakDate = localStorage.getItem("lastStreakDate");
+  // -- RESET HANDLERS --
+  const resetTasks = () => {
+    // Log completed tasks
+    const completed = tasks.filter(t => t.completed);
+    completed.forEach(t => logActivity("task", t.text));
 
-  if (lastStreakDate !== today) {
-    setStreak((prev) => prev + 1);
-    localStorage.setItem("lastStreakDate", today);
-  }
-}
-function resetTasks() {
-  const today = new Date().toDateString();
-
-  const completedTasks = tasks
-    .filter(t => t.completed)
-    .map(t => t.text);
-
-  if (completedTasks.length === 0) {
+    // Clear list
     setTasks([]);
-    return;
-  }
+  };
 
-  setDailyLog(prev => {
-    const previousTasks =
-      prev[today]?.tasksCompleted || [];
+  const resetVideos = () => {
+    // Log videos > 90%
+    const completed = videos.filter(v => v.progress >= 90);
+    completed.forEach(v => logActivity("video", v.title));
 
-    return {
-      ...prev,
-      [today]: {
-        ...prev[today],
-        tasksCompleted:[...new Set( [
-          ...previousTasks,
-          ...completedTasks
-        ])]
-      }
-    };
-  });
-
-  setTasks([]);
-}
-function resetVideos() {
-  const today = new Date().toDateString();
-
-  const completedVideos = videos
-    .filter(v => v.completed && v.progress >= 90)
-    .map(v => v.title);
-
-  if (completedVideos.length === 0) {
+    // Clear list
     setVideos([]);
-    return;
-  }
+  };
 
-  setDailyLog(prev => {
-    const previousVideos =
-      prev[today]?.videosCompleted || [];
+  // -- DELETE VIDEO HANDLER --
+  const handleDeleteVideo = (video) => {
+    // If > 90% progress, log it before deleting
+    if (video.progress >= 90) {
+      logActivity("video", video.title);
+    }
+    setVideos(prev => prev.filter(v => v.id !== video.id));
+  };
 
-    return {
-      ...prev,
-      [today]: {
-        ...prev[today],
-        videosCompleted: [
-          ...previousVideos,
-          ...completedVideos
-        ]
+
+  // -- RESIZE LOGIC --
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging.current) return;
+      const container = document.querySelector(".terminal-main-grid");
+      const rect = container.getBoundingClientRect();
+
+      let newWidth = e.clientX - rect.left;
+
+      // clamp
+      // Allow it to grow, only limited by minRightWidth logic below
+      newWidth = Math.max(240, newWidth);
+
+      // ensure right panel min width is 25% of total width
+      const minRightWidth = rect.width * 0.25;
+      if (rect.width - newWidth - 6 < minRightWidth) {
+        newWidth = rect.width - minRightWidth - 6;
       }
+
+      setLeftPanelWidth(newWidth);
+
     };
-  });
 
-  setVideos([]);
-}
-  // Load from localStorage
-useEffect(() => {
-  const savedTasks = JSON.parse(localStorage.getItem("tasks"));
-  const savedVideos = JSON.parse(localStorage.getItem("videos"));
-  const savedStreak = JSON.parse(localStorage.getItem("streak"));
+    const handleMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = "default";
+      document.body.style.userSelect = "auto";
+    };
 
-  if (savedTasks) setTasks(savedTasks);
-  if (savedVideos) setVideos(savedVideos);
-  if (savedStreak !== null) setStreak(savedStreak);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
-  setLoaded(true); //  VERY IMPORTANT
-}, []);
-
-
-  // Save tasks
-  useEffect(() => {
-    if(!loaded)return;
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks,loaded]);
-
-  // Save videos
-  useEffect(() => {
-    if(!loaded)return;
-    localStorage.setItem("videos", JSON.stringify(videos));
-  }, [videos,loaded]);
-  //streaksave
-  useEffect(() => {
-    if(!loaded) return;
-  localStorage.setItem("streak", JSON.stringify(streak));
-}, [streak,loaded]);
-  useEffect(() => {
-    const savedLog = JSON.parse(localStorage.getItem("dailyLog"));
-   if (savedLog) setDailyLog(savedLog);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
   }, []);
-  useEffect(() => {
-  localStorage.setItem("dailyLog", JSON.stringify(dailyLog));
-}, [dailyLog]);
-useEffect(() => {
-  localStorage.setItem("dailyLog", JSON.stringify(dailyLog));
-}, [dailyLog]);
 
   return (
-  <div
-  className="dashboard"
-  style={{
-    gridTemplateColumns: `${leftWidth}% 6px ${100 - leftWidth}%`
-  }}
->
-    <div
-    className="left-panel"
-  >
-      <Tasks
-  tasks={tasks}
-  setTasks={setTasks}
-  markActivity={markActivity}
-  resetTasks={resetTasks}
-/>
+    <div className="terminal-dashboard">
+      <div className="scanlines"></div>
 
-<Videos
-  videos={videos}
-  setVideos={setVideos}
-  markActivity={markActivity}
-  resetVideos={resetVideos}
-/>
-<br></br>
-<CodeforcesProfile />
-</div>
-<div
-  className="divider"
-  onMouseDown={() => (isDragging.current = true)}
-/>
+      {/* 0. TOP NAV ROW */}
+      <div className="terminal-nav-row">
+        <Link to="/" className="nav-link">[ HOME ]</Link>
+        <Link to="/contests" className="nav-link">[ CONTESTS ]</Link>
+      </div>
 
-  <div className="right-panel" >
-  <Calendar dailyLog={dailyLog} /> 
-  <br></br>
-  <Contests />     {/* moved down */}
-  <div className="streak-box">
-    <h2>Streak</h2>
-    <p><span className="fire-icon">🔥</span> {streak} day</p>
-  </div>
-</div>
+      {/* 1. HEADER INFO ROW */}
+      <div className="terminal-header-row">
+        <div className="brand-text">
+          PREPTRACK :: STREAK[<span className="highlight-green">{streak}</span>]
+        </div>
+        <div className="user-status">
+          USER: {currentUser?.email}
+          <button className="text-btn" onClick={async () => {
+            const newState = !notificationsEnabled;
 
-  </div>
-);
+            if (newState) {
+              // Turning ON: trigger email notification
+              const authToken = await currentUser.getIdToken();
+              const result = await enableNotifications(
+                currentUser.email,
+                currentUser.displayName || currentUser.email.split('@')[0],
+                authToken
+              );
 
+              if (result.success) {
+                setNotificationsEnabled(true);
+                localStorage.setItem("notificationsEnabled", "true");
+                await updateNotificationPreference(true, authToken);
+
+                if (result.emailSuccess) {
+                  alert("✅ Notifications enabled and confirmation email sent!");
+                } else {
+                  console.error("Email failed:", result.emailError);
+                  alert(`⚠️ Notifications enabled, but confirmation email failed (Error: ${result.emailError}). Please check backend .env credentials.`);
+                }
+              } else {
+                alert(`❌ Failed to enable notifications: ${result.error}`);
+              }
+            } else {
+              // Turning OFF: just update preference
+              setNotificationsEnabled(false);
+              localStorage.setItem("notificationsEnabled", "false");
+              const authToken = await currentUser.getIdToken();
+              await updateNotificationPreference(false, authToken);
+              console.log("🔕 Notifications disabled");
+            }
+          }} style={{ marginLeft: '20px' }}>
+            [ NOTIFS: {notificationsEnabled ? 'ON' : 'OFF'} ]
+          </button>
+          <button className="text-btn" onClick={logout} style={{ marginLeft: '10px' }}>
+            [ TERMINATE_SESSION ]
+          </button>
+        </div>
+      </div>
+
+      {/* MAIN GRID */}
+      <div className="terminal-main-grid" style={{ "--left-width": `${leftPanelWidth}px` }}>
+
+        {/* LEFT COLUMN */}
+        <div className="terminal-col left-col">
+          <Tasks
+            tasks={tasks}
+            setTasks={setTasks}
+            markActivity={markActivity}
+            resetTasks={resetTasks}
+          />
+
+          <div className="ascii-sep">
+            {"-".repeat(40)}
+          </div>
+
+          <Videos
+            videos={videos}
+            setVideos={setVideos}
+            markActivity={markActivity}
+            resetVideos={resetVideos}
+            onDeleteVideo={handleDeleteVideo}
+          />
+        </div>
+
+        {/* DRAG HANDLE */}
+        <div className="terminal-resizer" onMouseDown={handleMouseDown}></div>
+
+        {/* RIGHT COLUMN */}
+        <div className="terminal-col right-col">
+          <div style={{ flexShrink: 0, textAlign: 'right' }}>
+            <div
+              className="section-title"
+              style={{ cursor: "pointer", userSelect: "none" }}
+              onClick={() => setCalendarOpen(!calendarOpen)}
+            >
+              SYSTEM_CALENDAR :: {new Date().getFullYear()} [{calendarOpen ? "OPEN" : "MIN"}]
+            </div>
+
+            {calendarOpen && <MyCalendar dailyLog={dailyLog} />}
+          </div>
+
+
+          <div className="ascii-sep" style={{ margin: "10px 0", textAlign: 'right' }}>
+            {"=".repeat(60)}
+          </div>
+
+          <div style={{ flexShrink: 0 }}>
+            <Contests />
+            <CodeforcesProfile />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
 }
-//window.addEventListener("mousemove", (e) => {
-  //document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
-  //document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
-//});
 
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <nav style={{ padding: '10px', background: '#333', color: 'white', marginBottom: '20px' }}>
+            <Link to="/" style={{ color: 'white', marginRight: '15px' }}>Home</Link>
+            <Link to="/contests" style={{ color: 'white', marginRight: '15px' }}>Contests</Link>
+          </nav>
+
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contests"
+              element={
+                <ProtectedRoute>
+                  <Contests />
+                </ProtectedRoute>
+              }
+            />
+            {/* Add other protected routes as needed */}
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
+  );
+}
 
 export default App;
