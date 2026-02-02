@@ -37,13 +37,18 @@ function Tasks({ tasks = [], setTasks, markActivity, resetTasks }) {
 
   return (
     <div className="section-container">
-      <h1>PrepTrack.</h1>
-      <h2>Tasks</h2>
+      {/* HEADER */}
+      <div className="section-title">
+        // TASKS :: LIST
+      </div>
 
-      <div className="input-group">
+      {/* INPUT ROW */}
+      <div className="terminal-input-row">
+        <span>&gt;</span>
         <input
           type="text"
-          placeholder="Add a task..."
+          className="terminal-input"
+          placeholder="New_task_name..."
           value={taskInput}
           onChange={(e) => setTaskInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
@@ -54,14 +59,14 @@ function Tasks({ tasks = [], setTasks, markActivity, resetTasks }) {
           onChange={(e) => setPriority(e.target.value)}
           className="priority-select"
         >
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
+          <option value="High">PRIORITY: HIGH</option>
+          <option value="Medium">PRIORITY: MED</option>
+          <option value="Low">PRIORITY: LOW</option>
         </select>
 
-        <button onClick={handleAddTask}>Add</button>
-        <button className="reset-btn" onClick={resetTasks}>
-          Reset
+        <button className="bracket-btn" onClick={handleAddTask}>[ ADD ]</button>
+        <button className="text-btn" onClick={resetTasks}>
+          [ RESET ]
         </button>
       </div>
 
@@ -70,6 +75,7 @@ function Tasks({ tasks = [], setTasks, markActivity, resetTasks }) {
           {activeTasks.map((task, index) => (
             <li
               key={`active-${index}`}
+              className="task-item"
               onClick={() => {
                 setTasks(
                   tasks.map((t) => (t === task ? { ...t, completed: true } : t))
@@ -86,7 +92,7 @@ function Tasks({ tasks = [], setTasks, markActivity, resetTasks }) {
           {completedTasks.map((task, index) => (
             <li
               key={`done-${index}`}
-              className="completed"
+              className="task-item completed"
               onClick={() => {
                 setTasks(
                   tasks.map((t) =>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 function Calendar({ dailyLog = {} }) {
   const today = new Date();
@@ -70,46 +71,50 @@ function Calendar({ dailyLog = {} }) {
 
       {/* MODAL */}
       {showModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowModal(false)}
-        >
+        createPortal(
           <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
+            className="modal-overlay"
+            onClick={() => setShowModal(false)}
           >
-            <h2>{selectedDate.toDateString()}</h2>
-
-            <h3>Tasks completed</h3>
-            {selectedLog?.tasksCompleted?.length ? (
-              <ul>
-                {selectedLog.tasksCompleted.map((task, i) => (
-                  <li key={i}>{task}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">No tasks</p>
-            )}
-
-            <h3>Videos watched</h3>
-            {selectedLog?.videosCompleted?.length ? (
-              <ul>
-                {selectedLog.videosCompleted.map((video, i) => (
-                  <li key={i}>{video}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">No videos</p>
-            )}
-
-            <button
-              className="reset-btn"
-              onClick={() => setShowModal(false)}
+            <div
+              className="modal"
+              onClick={(e) => e.stopPropagation()}
             >
-              Close
-            </button>
-          </div>
-        </div>
+              <h2>{selectedDate.toDateString()}</h2>
+
+              <h3>Tasks completed</h3>
+              {selectedLog?.tasksCompleted?.length ? (
+                <ul>
+                  {selectedLog.tasksCompleted.map((task, i) => (
+                    <li key={i}>{task}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">No tasks</p>
+              )}
+
+              <h3>Videos watched</h3>
+              {selectedLog?.videosCompleted?.length ? (
+                <ul>
+                  {selectedLog.videosCompleted.map((video, i) => (
+                    <li key={i}>{video}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">No videos</p>
+              )}
+              <div style={{ textAlign: "left", marginTop: "20px" }}> {/* Left align button */}
+                <button
+                  className="bracket-btn"
+                  onClick={() => setShowModal(false)}
+                >
+                  [ CLOSE ]
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
       )}
     </>
   );

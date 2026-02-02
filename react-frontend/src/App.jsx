@@ -9,6 +9,8 @@ import MyCalendar from "./Calender"; // Capitalization from file list
 import Contests from "./contests";
 import Tasks from "./Tasks";
 import Videos from "./Videos";
+import PomodoroPage from "./Pomodoropage";
+
 import "./App.css";
 
 
@@ -156,11 +158,8 @@ function Dashboard() {
     <div className="terminal-dashboard">
       <div className="scanlines"></div>
 
-      {/* 0. TOP NAV ROW */}
-      <div className="terminal-nav-row">
-        <Link to="/" className="nav-link">[ HOME ]</Link>
-        <Link to="/contests" className="nav-link">[ CONTESTS ]</Link>
-      </div>
+      {/* 0. TOP NAV ROW REMOVED */}
+      {/* 1. HEADER INFO ROW */}
 
       {/* 1. HEADER INFO ROW */}
       <div className="terminal-header-row">
@@ -209,6 +208,10 @@ function Dashboard() {
           <button className="text-btn" onClick={logout} style={{ marginLeft: '10px' }}>
             [ TERMINATE_SESSION ]
           </button>
+
+          <Link to="/pomodoro" className="nav-link" style={{ marginLeft: '20px', color: '#00ff9c', textDecoration: 'none' }}>
+            {`[ >> POMODORO_TIMER ]`}
+          </Link>
         </div>
       </div>
 
@@ -266,6 +269,16 @@ function Dashboard() {
         </div>
 
       </div>
+
+      {/* FOOTER */}
+      <div className="terminal-footer">
+        <div className="footer-left">
+          [ SYSTEM_STATUS :: <span className="highlight-green">ONLINE</span> ]
+        </div>
+        <div className="footer-right">
+          © 2026 PREPTRACK_OS
+        </div>
+      </div>
     </div>
   );
 }
@@ -275,10 +288,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
-          <nav style={{ padding: '10px', background: '#333', color: 'white', marginBottom: '20px' }}>
-            <Link to="/" style={{ color: 'white', marginRight: '15px' }}>Home</Link>
-            <Link to="/contests" style={{ color: 'white', marginRight: '15px' }}>Contests</Link>
-          </nav>
+
 
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -295,6 +305,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Contests />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pomodoro"
+              element={
+                <ProtectedRoute>
+                  <PomodoroPage />
                 </ProtectedRoute>
               }
             />

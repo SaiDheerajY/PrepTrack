@@ -3,17 +3,13 @@ import { useState, useRef } from "react";
 
 function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVideo }) {
   const [input, setInput] = useState("");
-  const [priority, setPriority] = useState("Medium");
+  // Removed priority state
 
   // Track active intervals per video ID
   const intervalsRef = useRef({});
 
-  const getPriorityWeight = (p = "Medium") =>
-    p === "High" ? 3 : p === "Medium" ? 2 : 1;
-
-  const sortedVideos = [...videos].sort(
-    (a, b) => getPriorityWeight(b.priority) - getPriorityWeight(a.priority)
-  );
+  // Removed sorting by priority, showing mostly as is (or could reverse if needed, but keeping simple)
+  const displayVideos = [...videos];
 
   async function addVideo() {
     const id = extractVideoId(input);
@@ -30,14 +26,14 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
         {
           id,
           title: title || "Video",
-          priority,
+          // Removed priority field
           progress: 0,
           completed: false,
         },
       ]);
 
       setInput("");
-      setPriority("Medium");
+      // No priority reset needed
     } catch (error) {
       console.error("Error adding video:", error);
       alert("Failed to add video");
@@ -99,32 +95,30 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
 
   return (
     <div className="section-container">
-      <h2>Videos</h2>
+      <div className="section-title">
+        // VIDEOS :: PLAYLIST
+      </div>
 
-      <div className="input-group">
+      <div className="terminal-input-row">
+        <span>&gt;</span>
         <input
-          placeholder="Paste YouTube link..."
+          type="text"
+          className="terminal-input"
+          placeholder="Paste_YouTube_URL..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addVideo()}
         />
 
-        <select
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-          className="priority-select"
-        >
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
-        </select>
+        {/* Priority Select REMOVED */}
 
-        <button onClick={addVideo}>Add</button>
-        <button className="reset-btn" onClick={resetVideos}>
-          Reset
+        <button className="bracket-btn" onClick={addVideo}>[ ADD ]</button>
+        <button className="text-btn" onClick={resetVideos}>
+          [ RESET ]
         </button>
       </div>
 
-      {sortedVideos.map((video) => (
+      {displayVideos.map((video) => (
         <div key={video.id} className="video-card">
           <YouTube
             videoId={video.id}
@@ -150,11 +144,7 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
 
           <div className="video-header">
             <span className={video.completed ? "completed" : ""}>
-              <span
-                className={`priority-badge ${video.priority.toLowerCase()}`}
-              >
-                {video.priority}
-              </span>{" "}
+              {/* Priority Badge REMOVED */}
               {video.title}
             </span>
 

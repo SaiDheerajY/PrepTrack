@@ -1,0 +1,158 @@
+.pomodoro-page {
+    height: 100vh;
+    width: 100vw;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* ensure nothing else interferes */
+    position: relative;
+}
+
+
+.pomodoro-terminal {
+    width: 650px;
+    padding: 48px;
+    border: 1px solid rgba(0, 255, 156, 0.35);
+    background: rgba(0, 10, 5, 0.65);
+    font-family: 'JetBrains Mono', monospace;
+    color: #e0fff2;
+    box-shadow:
+        0 0 40px rgba(0, 255, 156, 0.1),
+        inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+
+/* Header */
+.pomodoro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #00ff9c;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+/* Mode Switch */
+.pomodoro-mode-switch {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.pomodoro-mode-switch button {
+    background: transparent;
+    border: 1px solid rgba(0, 255, 156, 0.4);
+    color: #7fffd4;
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    cursor: pointer;
+}
+
+.pomodoro-mode-switch button.active {
+    background: #00ff9c;
+    color: #000;
+}
+
+/* Timer */
+.pomodoro-timer {
+    font-size: 6.5rem;
+    letter-spacing: 6px;
+    margin-bottom: 30px;
+    color: #e6fff5;
+    text-shadow: 0 0 12px rgba(0, 255, 156, 0.25);
+    text-align: center;
+}
+
+
+/* Progress */
+.pomodoro-progress {
+    font-size: 0.75rem;
+    color: #00ff9c;
+    margin-bottom: 16px;
+}
+
+/* Input */
+.pomodoro-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.65rem;
+    margin-bottom: 16px;
+}
+
+.pomodoro-input input {
+    width: 60px;
+    background: #000;
+    border: 1px solid rgba(0, 255, 156, 0.5);
+    color: #00ff9c;
+    padding: 4px;
+    font-family: inherit;
+}
+
+.pomodoro-input button {
+    background: transparent;
+    border: 1px solid rgba(0, 255, 156, 0.4);
+    color: #00ff9c;
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    cursor: pointer;
+}
+
+/* Controls */
+.pomodoro-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.pomodoro-controls button {
+    background: transparent;
+    border: 1px solid rgba(0, 255, 156, 0.4);
+    color: #00ff9c;
+    font-family: inherit;
+    font-size: 0.7rem;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.pomodoro-controls button:hover:not(:disabled) {
+    background: #00ff9c;
+    color: #000;
+}
+
+.pomodoro-controls button:disabled {
+    opacity: 0.3;
+}
+
+/* Footer */
+.pomodoro-footer {
+    font-size: 0.7rem;
+    color: #7fffd4;
+}
+
+.cursor {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #00ff9c;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.close-btn:hover {
+    text-shadow: 0 0 8px #00ff9c;
+}
