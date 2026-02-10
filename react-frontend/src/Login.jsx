@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { login, signup } from "./auth";
+import { login, signup, signInWithGoogle } from "./auth";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 
@@ -52,6 +52,15 @@ export default function Login() {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        try {
+            await signInWithGoogle();
+            navigate("/");
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     return (
         <div className="login-container">
             <div className="scanlines"></div> {/* CRT OVERLAY EFFECT */}
@@ -72,6 +81,9 @@ export default function Login() {
                     </button>
                     <button className="big-bracket-btn" onClick={() => handleSelection("signup")}>
                         [ SIGN UP ]
+                    </button>
+                    <button className="big-bracket-btn" onClick={handleGoogleLogin} style={{ borderColor: '#4285F4', color: '#4285F4', marginTop: '20px' }}>
+                        [ GOOGLE_AUTH ]
                     </button>
                 </div>
             )}

@@ -3,14 +3,13 @@ import { useState, useRef } from "react";
 
 function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVideo }) {
   const [input, setInput] = useState("");
-  // Removed priority state
-
-  // Track active intervals per video ID
+  const [activeVideoId, setActiveVideoId] = useState(videos.length > 0 ? videos[0].id : null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const intervalsRef = useRef({});
 
-  // Removed sorting by priority, showing mostly as is (or could reverse if needed, but keeping simple)
-  const displayVideos = [...videos];
+  const activeVideo = videos.find(v => v.id === activeVideoId);
 
+  // ... (addVideo and deleteVideo functions remain the same) ...
   async function addVideo() {
     const id = extractVideoId(input);
     if (!id) {
@@ -26,14 +25,14 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
         {
           id,
           title: title || "Video",
-          // Removed priority field
+          url: input.trim(),
           progress: 0,
           completed: false,
         },
       ]);
 
+      if (!activeVideoId) setActiveVideoId(id);
       setInput("");
-      // No priority reset needed
     } catch (error) {
       console.error("Error adding video:", error);
       alert("Failed to add video");
@@ -41,13 +40,15 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
   }
 
   function deleteVideo(video) {
-    // Clear interval if exists
     if (intervalsRef.current[video.id]) {
       clearInterval(intervalsRef.current[video.id]);
       delete intervalsRef.current[video.id];
     }
 
-    // Call parent handler if available, else local (fallback)
+    if (activeVideoId === video.id) {
+      setActiveVideoId(null);
+    }
+
     if (onDeleteVideo) {
       onDeleteVideo(video);
     } else {
@@ -56,10 +57,7 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
   }
 
   function onStateChange(event, video) {
-    // Only start tracking when PLAYING
     if (event.data !== 1) return;
-
-    // Prevent duplicate intervals
     if (intervalsRef.current[video.id]) return;
 
     const player = event.target;
@@ -109,56 +107,75 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addVideo()}
         />
-
-        {/* Priority Select REMOVED */}
-
         <button className="bracket-btn" onClick={addVideo}>[ ADD ]</button>
         <button className="text-btn" onClick={resetVideos}>
           [ RESET ]
         </button>
       </div>
 
-      {displayVideos.map((video) => (
-        <div key={video.id} className="video-card">
-          <YouTube
-            videoId={video.id}
-            opts={{
-              width: "100%",
-              height: "220",
-              playerVars: {
-                autoplay: 0,
-                controls: 1,
-                modestbranding: 1,
-              },
-            }}
-            onStateChange={(e) => onStateChange(e, video)}
-          />
-
-
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${video.progress}%` }}
-            />
+      {/* CENTRAL PLAYER */}
+      {activeVideoId && (
+        <div className={`central-player ${isCollapsed ? 'collapsed' : ''}`}>
+          <div className="player-controls">
+            <span className="terminal-green">VIEW :: {activeVideo?.title}</span>
+            <button className="text-btn" onClick={() => setIsCollapsed(!isCollapsed)}>
+              [ {isCollapsed ? "EXPAND" : "COLLAPSE"} ]
+            </button>
           </div>
 
-          <div className="video-header">
-            <span className={video.completed ? "completed" : ""}>
-              {/* Priority Badge REMOVED */}
-              {video.title}
-            </span>
+          {!isCollapsed && (
+            <>
+              <YouTube
+                videoId={activeVideoId}
+                opts={{
+                  width: "100%",
+                  height: "220",
+                  playerVars: {
+                    autoplay: 0,
+                    controls: 1,
+                    modestbranding: 1,
+                  },
+                }}
+                onStateChange={(e) => onStateChange(e, activeVideo)}
+              />
+              <div className="active-video-details">
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${activeVideo?.progress || 0}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
+      {/* VIDEO LIST */}
+      <div className="video-list-container">
+        {videos.map((video) => (
+          <div
+            key={video.id}
+            className={`video-list-item ${activeVideoId === video.id ? 'active' : ''}`}
+            onClick={() => setActiveVideoId(video.id)}
+          >
+            <div className="item-prefix">[ {video.completed ? 'X' : ' '} ]</div>
+            <div className={`video-title-item ${video.completed ? 'completed' : ''}`}>
+              {video.title}
+            </div>
+            <div className="item-progress">{video.progress}%</div>
             <button
               className="delete-btn"
-              onClick={() => deleteVideo(video)}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteVideo(video);
+              }}
             >
               ✕
             </button>
           </div>
-
-          <p>{video.progress}% watched</p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

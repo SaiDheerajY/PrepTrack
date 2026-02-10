@@ -2,11 +2,34 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
+import cron from "node-cron";
 import { admin, db } from "./firebaseAdmin.js";
 import { verifyToken } from "./authMiddleware.js";
-import { sendNotificationWelcomeEmail, verifyEmailConfig } from "./emailService.js";
+import { sendNotificationWelcomeEmail, sendStreakReminder, verifyEmailConfig } from "./emailService.js";
 
 dotenv.config();
+
+// -- CRON JOB: Check Streaks daily at 8:00 PM --
+cron.schedule('0 20 * * *', async () => {
+  console.log('⏰ Running Daily Streak Check (8:00 PM)...');
+
+  try {
+    const usersSnapshot = await db.collection('users').where('notificationsEnabled', '==', true).get();
+    const today = new Date().toDateString();
+
+    usersSnapshot.forEach(async (doc) => {
+      const userData = doc.data();
+      const lastActive = userData.lastActiveDate; // "Mon Jan 01 2024" format
+
+      if (lastActive !== today) {
+        console.log(`⚠️ User ${userData.email} is inactive today. Sending reminder...`);
+        await sendStreakReminder(userData.email, userData.displayName || "User");
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error in Streak Cron Job:', error);
+  }
+});
 
 const app = express();
 const PORT = 5000;
@@ -105,6 +128,59 @@ app.get("/api/codeforces/user/:handle", async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch Codeforces user" });
+  }
+});
+
+/**
+ * AI Summary via Groq (Protected)
+ */
+app.post("/api/ai-summary", verifyToken, async (req, res) => {
+  const { view, totalTasks, totalVideos, activeDays, totalDays, streak, bestDay, topTasks, topVideos } = req.body;
+
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey || apiKey === "YOUR_GROQ_API_KEY_HERE") {
+    return res.status(500).json({ error: "Groq API key not configured" });
+  }
+
+  const prompt = `You are an AI coach for a competitive programming student tracker app called PrepTrack. Analyze the following ${view} stats and give a short, motivational, data-driven summary (max 150 words). Use a direct, slightly hacker/terminal tone. Include specific observations and actionable tips.
+
+Stats:
+- Tasks Completed: ${totalTasks}
+- Videos Watched: ${totalVideos}
+- Active Days: ${activeDays}/${totalDays}
+- Current Streak: ${streak} days
+- Most Productive Day: ${bestDay}
+- Top Tasks: ${topTasks?.join(", ") || "None"}
+- Top Videos: ${topVideos?.join(", ") || "None"}
+
+Give insights on consistency, areas of improvement, and encouragement. Format with line breaks for readability.`;
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 300,
+        temperature: 0.7,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.choices && data.choices[0]) {
+      res.json({ insight: data.choices[0].message.content });
+    } else {
+      console.error("Groq response error:", data);
+      res.status(500).json({ error: "AI generation failed", details: data.error?.message || "Unknown error" });
+    }
+  } catch (error) {
+    console.error("Groq API error:", error);
+    res.status(500).json({ error: "AI generation failed", details: error.message });
   }
 });
 

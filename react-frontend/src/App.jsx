@@ -1,45 +1,126 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { logout } from "./auth";
 import { enableNotifications, updateNotificationPreference } from "./notifications";
+import { useFirestore } from "./useFirestore";
 import Login from "./Login";
-import MyCalendar from "./Calender"; // Capitalization from file list
+import MyCalendar from "./Calender";
 import Contests from "./contests";
 import Tasks from "./Tasks";
 import Videos from "./Videos";
 import PomodoroPage from "./Pomodoropage";
+import Summary from "./Summary";
+import CodeforcesProfile from "./codeforcesprofile";
 
 import "./App.css";
-
-
-import CodeforcesProfile from "./codeforcesprofile";
 
 function Dashboard() {
   const { currentUser } = useAuth();
 
+  // -- FIREBASE SYNC --
+  const uid = currentUser?.uid;
+  const getKey = (key) => uid ? `${key}_${uid}` : key;
+  const { data: cloudData, loading: cloudLoading, saveData } = useFirestore(uid);
+
   // -- STATE --
-  const [videos, setVideos] = useState(() => JSON.parse(localStorage.getItem("videos")) || []);
-  const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem("tasks")) || []);
-  const [dailyLog, setDailyLog] = useState(() => JSON.parse(localStorage.getItem("dailyLog")) || {});
-  const [streak, setStreak] = useState(() => Number(localStorage.getItem("streak")) || 0);
-  const [lastActiveDate, setLastActiveDate] = useState(() => localStorage.getItem("lastActiveDate") || "");
+  const [videos, setVideos] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [dailyLog, setDailyLog] = useState({});
+  const [streak, setStreak] = useState(0);
+  const [lastActiveDate, setLastActiveDate] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(true);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
-    localStorage.getItem("notificationsEnabled") === "true"
-  );
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const isInitialized = useRef(false); // Guard: prevent saving before data loads
 
-  const [leftPanelWidth, setLeftPanelWidth] = useState(() => Number(localStorage.getItem("leftPanelWidth")) || (window.innerWidth * 0.75));
+  // -- THEME STATE (Simple) --
+  // Restoring simple theme state since CSS supports it
+  const [currentTheme, setCurrentTheme] = useState(() => localStorage.getItem("appTheme") || "spring");
+
+  const themes = ["spring", "amber", "cyber", "matrix"];
+  const cycleTheme = () => {
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const nextTheme = themes[nextIndex];
+    setCurrentTheme(nextTheme);
+    localStorage.setItem("appTheme", nextTheme);
+  };
+
+  useEffect(() => {
+    // Apply theme to body
+    document.body.className = ""; // clear previous
+    if (currentTheme !== "spring") {
+      document.body.classList.add(`theme-${currentTheme}`);
+    }
+  }, [currentTheme]);
+
+
+  // -- INITIAL FETCH & MIGRATION --
+  useEffect(() => {
+    if (!uid || cloudLoading) return;
+
+    if (cloudData) {
+      setVideos(cloudData.videos || []);
+      setTasks(cloudData.tasks || []);
+      setDailyLog(cloudData.dailyLog || {});
+      setStreak(cloudData.streak || 0);
+      setLastActiveDate(cloudData.lastActiveDate || "");
+      setNotificationsEnabled(cloudData.notificationsEnabled || false);
+    } else {
+      const getLocal = (k) => {
+        const namespaced = localStorage.getItem(`${k}_${uid}`);
+        if (namespaced) return JSON.parse(namespaced);
+        return JSON.parse(localStorage.getItem(k));
+      };
+
+      const localVideos = getLocal("videos") || [];
+      const localTasks = getLocal("tasks") || [];
+      const localLog = getLocal("dailyLog") || {};
+      const localStreak = Number(localStorage.getItem(`streak_${uid}`) || localStorage.getItem("streak")) || 0;
+      const localLastActive = localStorage.getItem(`lastActiveDate_${uid}`) || localStorage.getItem("lastActiveDate") || "";
+      const localNotif = (localStorage.getItem(`notificationsEnabled_${uid}`) || localStorage.getItem("notificationsEnabled")) === "true";
+
+      setVideos(localVideos);
+      setTasks(localTasks);
+      setDailyLog(localLog);
+      setStreak(localStreak);
+      setLastActiveDate(localLastActive);
+      setNotificationsEnabled(localNotif);
+
+      saveData({
+        videos: localVideos,
+        tasks: localTasks,
+        dailyLog: localLog,
+        streak: localStreak,
+        lastActiveDate: localLastActive,
+        notificationsEnabled: localNotif
+      });
+    }
+
+    // Mark as ready — now persistence effect can safely run
+    isInitialized.current = true;
+  }, [uid, cloudLoading, cloudData, saveData]);
+
+
+  // -- PERSISTENCE (only runs AFTER initial data is loaded) --
+  useEffect(() => {
+    if (!uid || !isInitialized.current) return; // <-- GUARD: skip until data loaded
+    const dataToSave = { videos, tasks, dailyLog, streak, lastActiveDate, notificationsEnabled };
+    saveData(dataToSave);
+
+    localStorage.setItem(getKey("videos"), JSON.stringify(videos));
+    localStorage.setItem(getKey("tasks"), JSON.stringify(tasks));
+    localStorage.setItem(getKey("dailyLog"), JSON.stringify(dailyLog));
+    localStorage.setItem(getKey("streak"), streak);
+    localStorage.setItem(getKey("lastActiveDate"), lastActiveDate);
+    localStorage.setItem(getKey("notificationsEnabled"), notificationsEnabled);
+  }, [videos, tasks, dailyLog, streak, lastActiveDate, notificationsEnabled, uid, saveData, getKey]);
+
+
+  const [leftPanelWidth, setLeftPanelWidth] = useState(() => Number(localStorage.getItem(getKey("leftPanelWidth"))) || (window.innerWidth * 0.75));
+  useEffect(() => { localStorage.setItem(getKey("leftPanelWidth"), leftPanelWidth); }, [leftPanelWidth, uid]);
   const isDragging = useRef(false);
-
-  // -- PERSISTENCE --
-  useEffect(() => { localStorage.setItem("videos", JSON.stringify(videos)); }, [videos]);
-  useEffect(() => { localStorage.setItem("tasks", JSON.stringify(tasks)); }, [tasks]);
-  useEffect(() => { localStorage.setItem("dailyLog", JSON.stringify(dailyLog)); }, [dailyLog]);
-  useEffect(() => { localStorage.setItem("streak", streak); }, [streak]);
-  useEffect(() => { localStorage.setItem("lastActiveDate", lastActiveDate); }, [lastActiveDate]);
-  useEffect(() => { localStorage.setItem("leftPanelWidth", leftPanelWidth); }, [leftPanelWidth]);
 
 
   // -- LOGGING LOGIC --
@@ -60,49 +141,34 @@ function Dashboard() {
       };
     });
 
-    // Update Streak
     if (lastActiveDate !== today) {
-      // If last active was yesterday, increment. If older, reset to 1.
-      // Simple logic: just increment if not today. 
-      // Real streak logic requires checking if yesterday was skipped. 
-      // For simple resume project: Increment if new day.
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
       if (lastActiveDate === yesterday.toDateString()) {
         setStreak(s => s + 1);
       } else {
-        setStreak(1); // Reset or Start new
+        setStreak(1);
       }
       setLastActiveDate(today);
     }
   };
 
-  const markActivity = () => { /* Placeholder if components just call this for fun */ };
+  const markActivity = () => { };
 
-
-  // -- RESET HANDLERS --
   const resetTasks = () => {
-    // Log completed tasks
     const completed = tasks.filter(t => t.completed);
     completed.forEach(t => logActivity("task", t.text));
-
-    // Clear list
     setTasks([]);
   };
 
   const resetVideos = () => {
-    // Log videos > 90%
     const completed = videos.filter(v => v.progress >= 90);
     completed.forEach(v => logActivity("video", v.title));
-
-    // Clear list
     setVideos([]);
   };
 
-  // -- DELETE VIDEO HANDLER --
   const handleDeleteVideo = (video) => {
-    // If > 90% progress, log it before deleting
     if (video.progress >= 90) {
       logActivity("video", video.title);
     }
@@ -122,21 +188,13 @@ function Dashboard() {
       if (!isDragging.current) return;
       const container = document.querySelector(".terminal-main-grid");
       const rect = container.getBoundingClientRect();
-
       let newWidth = e.clientX - rect.left;
-
-      // clamp
-      // Allow it to grow, only limited by minRightWidth logic below
       newWidth = Math.max(240, newWidth);
-
-      // ensure right panel min width is 25% of total width
       const minRightWidth = rect.width * 0.25;
       if (rect.width - newWidth - 6 < minRightWidth) {
         newWidth = rect.width - minRightWidth - 6;
       }
-
       setLeftPanelWidth(newWidth);
-
     };
 
     const handleMouseUp = () => {
@@ -147,7 +205,6 @@ function Dashboard() {
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
@@ -158,118 +215,87 @@ function Dashboard() {
     <div className="terminal-dashboard">
       <div className="scanlines"></div>
 
-      {/* 0. TOP NAV ROW REMOVED */}
-      {/* 1. HEADER INFO ROW */}
-
-      {/* 1. HEADER INFO ROW */}
       <div className="terminal-header-row">
         <div className="brand-text">
-          PREPTRACK :: STREAK[<span className="highlight-green">{streak}</span>]
+          PREPTRACK
         </div>
-        <Link to="/pomodoro" className="nav-link" style={{ color: '#00ff9c', textDecoration: 'none' }}>
+        <div className="user-status">
+          STREAK: <span style={{ color: 'var(--terminal-green)', fontWeight: 'bold' }}>{streak}</span>
+        </div>
+
+        <Link to="/pomodoro" className="nav-link" style={{ color: 'var(--terminal-green)', textDecoration: 'none' }}>
           {`[ >> POMODORO_TIMER ]`}
         </Link>
+        <Link to="/summary" className="nav-link" style={{ color: 'var(--terminal-green)', textDecoration: 'none' }}>
+          {`[ >> WRAPPED ]`}
+        </Link>
+
         <div className="user-status">
           USER: {currentUser?.email}
+
           <button className="text-btn" onClick={async () => {
             const newState = !notificationsEnabled;
-
             if (newState) {
-              // Turning ON: trigger email notification
               const authToken = await currentUser.getIdToken();
               const result = await enableNotifications(
                 currentUser.email,
                 currentUser.displayName || currentUser.email.split('@')[0],
                 authToken
               );
-
               if (result.success) {
                 setNotificationsEnabled(true);
-                localStorage.setItem("notificationsEnabled", "true");
+                localStorage.setItem(getKey("notificationsEnabled"), "true");
                 await updateNotificationPreference(true, authToken);
-
-                if (result.emailSuccess) {
-                  alert("✅ Notifications enabled and confirmation email sent!");
-                } else {
-                  console.error("Email failed:", result.emailError);
-                  alert(`⚠️ Notifications enabled, but confirmation email failed (Error: ${result.emailError}). Please check backend .env credentials.`);
-                }
+                if (result.emailSuccess) alert("✅ Notifications enabled!");
+                else alert(`⚠️ Enabled, but email failed: ${result.emailError}`);
               } else {
-                alert(`❌ Failed to enable notifications: ${result.error}`);
+                alert(`❌ Failed: ${result.error}`);
               }
             } else {
-              // Turning OFF: just update preference
               setNotificationsEnabled(false);
-              localStorage.setItem("notificationsEnabled", "false");
+              localStorage.setItem(getKey("notificationsEnabled"), "false");
               const authToken = await currentUser.getIdToken();
               await updateNotificationPreference(false, authToken);
-              console.log("🔕 Notifications disabled");
             }
           }} style={{ marginLeft: '20px' }}>
             [ NOTIFS: {notificationsEnabled ? 'ON' : 'OFF'} ]
           </button>
+
+          {/* THEME TOGGLE (Restored Simple Version) */}
+          <button className="text-btn" onClick={cycleTheme} style={{ marginLeft: '10px', color: 'var(--terminal-green)' }}>
+            [ THEME: {currentTheme.toUpperCase()} ]
+          </button>
+
           <button className="text-btn" onClick={logout} style={{ marginLeft: '10px' }}>
-            [ TERMINATE_SESSION ]
+            LOGOUT
           </button>
         </div>
       </div>
 
-      {/* MAIN GRID */}
       <div className="terminal-main-grid" style={{ "--left-width": `${leftPanelWidth}px` }}>
-
-        {/* LEFT COLUMN */}
         <div className="terminal-col left-col">
-          <Tasks
-            tasks={tasks}
-            setTasks={setTasks}
-            markActivity={markActivity}
-            resetTasks={resetTasks}
-          />
-
-          <div className="ascii-sep">
-            {"-".repeat(40)}
-          </div>
-
-          <Videos
-            videos={videos}
-            setVideos={setVideos}
-            markActivity={markActivity}
-            resetVideos={resetVideos}
-            onDeleteVideo={handleDeleteVideo}
-          />
+          <Tasks tasks={tasks} setTasks={setTasks} markActivity={markActivity} resetTasks={resetTasks} />
+          <div className="ascii-sep">{"-".repeat(40)}</div>
+          <Videos videos={videos} setVideos={setVideos} markActivity={markActivity} resetVideos={resetVideos} onDeleteVideo={handleDeleteVideo} />
         </div>
 
-        {/* DRAG HANDLE */}
         <div className="terminal-resizer" onMouseDown={handleMouseDown}></div>
 
-        {/* RIGHT COLUMN */}
         <div className="terminal-col right-col">
           <div style={{ flexShrink: 0, textAlign: 'right' }}>
-            <div
-              className="section-title"
-              style={{ cursor: "pointer", userSelect: "none" }}
-              onClick={() => setCalendarOpen(!calendarOpen)}
-            >
+            <div className="section-title" style={{ cursor: "pointer", userSelect: "none" }} onClick={() => setCalendarOpen(!calendarOpen)}>
               SYSTEM_CALENDAR :: {new Date().getFullYear()} [{calendarOpen ? "OPEN" : "MIN"}]
             </div>
-
             {calendarOpen && <MyCalendar dailyLog={dailyLog} />}
           </div>
-
-
-          <div className="ascii-sep" style={{ margin: "10px 0", textAlign: 'right' }}>
-            {"=".repeat(60)}
-          </div>
-
+          <div className="ascii-sep" style={{ margin: "10px 0", textAlign: 'right' }}>{"=".repeat(60)}</div>
           <div style={{ flexShrink: 0 }}>
             <Contests />
             <CodeforcesProfile />
           </div>
         </div>
-
       </div>
 
-      {/* FOOTER */}
       <div className="terminal-footer">
         <div className="footer-left">
           [ SYSTEM_STATUS :: <span className="highlight-green">ONLINE</span> ]
@@ -282,40 +308,32 @@ function Dashboard() {
   );
 }
 
+function SummaryPage() {
+  const { currentUser } = useAuth();
+  const uid = currentUser?.uid;
+  const { data: cloudData, loading } = useFirestore(uid);
+
+  if (loading) return <div style={{ color: '#00ff9c', textAlign: 'center', marginTop: '40vh', fontFamily: 'monospace' }}>Loading data...</div>;
+
+  return (
+    <Summary
+      dailyLog={cloudData?.dailyLog || {}}
+      streak={cloudData?.streak || 0}
+    />
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="App">
-
-
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/contests"
-              element={
-                <ProtectedRoute>
-                  <Contests />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pomodoro"
-              element={
-                <ProtectedRoute>
-                  <PomodoroPage />
-                </ProtectedRoute>
-              }
-            />
-            {/* Add other protected routes as needed */}
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/contests" element={<ProtectedRoute><Contests /></ProtectedRoute>} />
+            <Route path="/pomodoro" element={<ProtectedRoute><PomodoroPage /></ProtectedRoute>} />
+            <Route path="/summary" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />
           </Routes>
         </div>
       </Router>

@@ -3,17 +3,27 @@ import { createPortal } from "react-dom";
 
 function Calendar({ dailyLog = {} }) {
   const today = new Date();
+  const [viewDate, setViewDate] = useState(today); // Track displayed month
   const [selectedDate, setSelectedDate] = useState(today);
   const [showModal, setShowModal] = useState(false);
 
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
 
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
   const daysInMonth = lastDay.getDate();
   const startDay = firstDay.getDay();
+
+  // Navigation Handlers
+  const prevMonth = () => {
+    setViewDate(new Date(year, month - 1, 1));
+  };
+
+  const nextMonth = () => {
+    setViewDate(new Date(year, month + 1, 1));
+  };
 
   function getHeatLevel(log) {
     if (!log) return 0;
@@ -42,11 +52,12 @@ function Calendar({ dailyLog = {} }) {
     const log = dailyLog[key];
     const heat = getHeatLevel(log);
 
+    const isToday = date.toDateString() === today.toDateString();
+
     days.push(
       <div
         key={key}
-        className={`calendar-day heat-${heat} ${key === selectedKey ? "selected" : ""
-          }`}
+        className={`calendar-day heat-${heat} ${key === selectedKey ? "selected" : ""} ${isToday ? "is-today" : ""}`}
         onClick={() => {
           setSelectedDate(date);
           setShowModal(true);
@@ -60,7 +71,11 @@ function Calendar({ dailyLog = {} }) {
   return (
     <>
       <div className="calendar-box">
-        <h2>Calendar</h2>
+        <div className="calendar-header">
+          <button onClick={prevMonth} className="nav-btn">&lt;</button>
+          <h2>{viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+          <button onClick={nextMonth} className="nav-btn">&gt;</button>
+        </div>
 
         <div className="calendar-grid">{days}</div>
 

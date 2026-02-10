@@ -14,6 +14,35 @@
   --grid-line: rgba(0, 255, 156, 0.05);
 }
 
+/* THEME CLASSES */
+.theme-amber {
+  --bg-color: #0d0500;
+  --terminal-color: #ffb000;
+  --terminal-dim: rgba(255, 176, 0, 0.5);
+  --grid-line: rgba(255, 176, 0, 0.05);
+}
+
+.theme-cyber {
+  --bg-color: #050005;
+  --terminal-color: #ff00ff;
+  --terminal-dim: rgba(255, 0, 255, 0.5);
+  --grid-line: rgba(255, 0, 255, 0.05);
+  /* Cyber also uses cyan for secondary accents, handled via specific overrides or mixed vars if needed */
+}
+
+.theme-matrix {
+  --bg-color: #000500;
+  --terminal-color: #00cc00;
+  /* Darker, classic matrix green */
+  --terminal-dim: rgba(0, 204, 0, 0.5);
+  --grid-line: rgba(0, 50, 0, 0.1);
+}
+
+:root {
+  --terminal-green: var(--terminal-color);
+  /* Mapping back for legacy code that uses --terminal-green */
+}
+
 * {
   box-sizing: border-box;
 }
@@ -328,6 +357,38 @@ body {
   margin-bottom: 20px;
 }
 
+/* CALENDAR HEADER & NAV */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calendar-header h2 {
+  font-size: 1rem;
+  color: var(--terminal-green);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--terminal-dim);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: bold;
+}
+
+.nav-btn:hover {
+  border-color: var(--terminal-green);
+  color: var(--terminal-green);
+  text-shadow: 0 0 5px var(--terminal-green);
+}
+
 .calendar-day {
   /* User requested height to grow much slower than width (approx 1/5th rate, but 3 is safer for text) */
   aspect-ratio: 1/1;
@@ -346,40 +407,165 @@ body {
   color: #666;
 }
 
+
 .calendar-day:hover {
   border: 1px solid var(--terminal-green);
   color: #fff;
 }
 
-/* Heatmap Colors */
+/* CURRENT DAY HIGHLIGHT */
+.calendar-day.is-today {
+  font-weight: bold;
+  position: relative;
+  border: 1px solid var(--terminal-green) !important;
+  /* Force border */
+  box-shadow: 0 0 10px rgba(0, 255, 156, 0.2);
+  background-color: rgba(0, 255, 156, 0.15) !important;
+  /* Highlight background */
+  color: var(--terminal-green) !important;
+  text-shadow: 0 0 8px var(--terminal-green);
+  z-index: 2;
+}
+
+.calendar-day.is-today::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  background-color: var(--terminal-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--terminal-green);
+  /* Stronger glow */
+  z-index: 3;
+}
+
+/* Heatmap Colors — Progressively brighter & more glowy */
 .heat-0 {
   background: #111;
+  border: 1px solid #222;
 }
 
 .heat-1 {
-  background: rgba(0, 255, 156, 0.2);
-  color: #fff;
+  background: rgba(0, 255, 156, 0.15);
+  border: 1px solid rgba(0, 255, 156, 0.3);
+  color: var(--terminal-green);
+  text-shadow: 0 0 4px rgba(0, 255, 156, 0.4);
 }
 
 .heat-2 {
-  background: rgba(0, 255, 156, 0.5);
-  color: #000;
+  background: rgba(0, 255, 156, 0.35);
+  border: 1px solid rgba(0, 255, 156, 0.6);
+  color: #fff;
   font-weight: bold;
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.5);
+  box-shadow: 0 0 6px rgba(0, 255, 156, 0.15);
 }
 
 .heat-3 {
-  background: #00ff9c;
+  background: rgba(0, 255, 156, 0.6);
+  border: 1px solid var(--terminal-green);
   color: #000;
   font-weight: bold;
-  box-shadow: 0 0 10px var(--terminal-green);
+  box-shadow: 0 0 12px rgba(0, 255, 156, 0.4), inset 0 0 8px rgba(0, 255, 156, 0.2);
+  text-shadow: none;
 }
 
-/* Video Items */
-.terminal-video-item {
-  margin-bottom: 20px;
-  border: 1px solid #222;
+/* Video Refactor: Central Player & List */
+.central-player {
+  background: #000;
+  border: 1px solid var(--terminal-dim);
   padding: 10px;
-  background: rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+  box-shadow: 0 0 15px rgba(0, 255, 156, 0.05);
+}
+
+.central-player.collapsed {
+  margin-bottom: 10px;
+  padding: 5px 10px;
+}
+
+.player-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.central-player.collapsed .player-controls {
+  margin-bottom: 0;
+}
+
+.active-video-details {
+  margin-top: 10px;
+}
+
+.active-title-row {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.video-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.video-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 255, 156, 0.1);
+  background: rgba(0, 255, 156, 0.02);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.video-list-item:hover {
+  background: rgba(0, 255, 156, 0.05);
+  border-color: rgba(0, 255, 156, 0.3);
+}
+
+.video-list-item.active {
+  background: rgba(0, 255, 156, 0.08);
+  border-color: var(--terminal-green);
+  box-shadow: inset 3px 0 0 var(--terminal-green);
+}
+
+.item-prefix {
+  font-family: monospace;
+  color: var(--terminal-dim);
+  font-size: 0.8rem;
+}
+
+.video-title-item {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-title-item.completed {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.item-progress {
+  font-size: 0.75rem;
+  color: var(--terminal-green);
+  font-weight: bold;
+  min-width: 40px;
+  text-align: right;
 }
 
 .video-title-row {
@@ -417,6 +603,50 @@ body {
 ::-webkit-scrollbar-track {
   background: #111;
   border-left: 1px solid #222;
+}
+
+/* PROGRESS BARS */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--terminal-green);
+  box-shadow: 0 0 15px var(--terminal-green), 0 0 30px rgba(0, 255, 156, 0.4);
+  transition: width 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* =========================ANIMATED TERMINAL LOGIN=========================*/
