@@ -1,7 +1,9 @@
 .summary-page {
     min-height: 100vh;
-    background: #000;
-    color: #fff;
+    background: #000 !important;
+    /* Force Black Background */
+    color: #fff !important;
+    /* Force White Text */
     font-family: 'JetBrains Mono', monospace;
     position: relative;
     overflow-x: hidden;
@@ -14,9 +16,10 @@
 .dynamic-visual-bg {
     position: fixed;
     inset: 0;
-    background:
-        radial-gradient(circle at 10% 10%, rgba(0, 255, 156, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 90% 90%, rgba(0, 255, 156, 0.05) 0%, transparent 50%);
+    position: fixed;
+    inset: 0;
+    background: #000;
+    /* Force absolute black for visuals */
     z-index: 0;
 }
 
@@ -51,7 +54,9 @@
 
 .year-tag {
     font-size: 0.8rem;
-    color: var(--terminal-green);
+    font-size: 0.8rem;
+    color: #00ff9c;
+    /* Force Neon Green */
     letter-spacing: 10px;
     margin-bottom: 5px;
 }
@@ -66,7 +71,8 @@
 }
 
 .highlight-text {
-    color: var(--terminal-green);
+    color: #00ff9c;
+    /* Force Neon Green */
     text-shadow: 0 0 40px rgba(0, 255, 156, 0.4);
 }
 
@@ -164,8 +170,8 @@
 
 .highlight-box {
     flex: 1;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--panel-bg);
+    border: var(--glass-border);
     padding: 25px 40px;
     text-align: center;
     transition: all 0.4s;
@@ -179,7 +185,7 @@
 
 .highlight-box .label {
     font-size: 0.7rem;
-    color: #555;
+    color: var(--text-muted);
     letter-spacing: 4px;
 }
 
@@ -188,7 +194,7 @@
     font-size: 3rem;
     font-weight: 800;
     margin: 10px 0;
-    color: #fff;
+    color: var(--text-main);
 }
 
 .highlight-box .trend {
@@ -199,14 +205,14 @@
 
 /* VIZ CONTAINER */
 .viz-container {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--panel-bg);
+    border: var(--glass-border);
     padding: 30px 40px;
 }
 
 .viz-header {
     font-size: 0.7rem;
-    color: #444;
+    color: var(--text-muted);
     letter-spacing: 5px;
     margin-bottom: 20px;
     text-align: center;
@@ -249,8 +255,8 @@
     left: 0;
     width: 100%;
     height: 4px;
-    background: #fff;
-    box-shadow: 0 0 15px #fff;
+    background: var(--text-main);
+    box-shadow: 0 0 15px var(--text-main);
 }
 
 .chart-col label {
@@ -280,7 +286,7 @@
 .list-panel h3,
 .ai-insight-panel h3 {
     font-size: 0.8rem;
-    color: #666;
+    color: var(--text-muted);
     letter-spacing: 6px;
     margin-bottom: 25px;
 }
@@ -300,8 +306,9 @@
     align-items: center;
     gap: 20px;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--panel-bg);
     border-left: 3px solid var(--terminal-green);
+    border: var(--glass-border);
 }
 
 .list-item .num {
@@ -312,13 +319,13 @@
 
 .list-item .name {
     font-size: 0.9rem;
-    color: #ccc;
+    color: var(--text-main);
 }
 
 /* AI INSIGHT CARD */
 .ai-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 255, 156, 0.03) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, var(--panel-bg) 0%, rgba(var(--terminal-green-rgb), 0.05) 100%);
+    border: var(--glass-border);
     padding: 40px;
     min-height: 250px;
     display: flex;
@@ -330,8 +337,9 @@
 .insight-text {
     font-size: 1.1rem;
     line-height: 1.8;
-    color: #ddd;
+    color: var(--text-main);
     font-style: italic;
+    opacity: 0.9;
 }
 
 .analyze-btn {
@@ -350,13 +358,19 @@
     top: 40px;
     right: 40px;
     z-index: 1000;
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: var(--panel-bg);
+    border: var(--glass-border);
+    color: var(--text-muted);
     padding: 8px 20px;
     cursor: pointer;
     font-size: 0.7rem;
     letter-spacing: 2px;
+    transition: all 0.3s;
+}
+
+.exit-btn:hover {
+    border-color: var(--terminal-green);
+    color: var(--terminal-green);
 }
 
 @media (max-width: 1000px) {
@@ -379,8 +393,8 @@
     position: relative;
     z-index: 10;
     padding: 20px 50px;
-    background: rgba(5, 5, 5, 0.4);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--panel-bg);
+    border-top: var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -396,7 +410,7 @@
 
 .footer-stat {
     font-size: 0.6rem;
-    color: #444;
+    color: var(--text-muted);
     letter-spacing: 2px;
 }
 

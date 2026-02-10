@@ -9,15 +9,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--panel-bg);
+  border: var(--glass-border);
   border-left: 3px solid var(--terminal-green);
   transition: all 0.3s ease;
 }
 
 .contest-card:hover {
-  background: rgba(0, 255, 156, 0.05);
-  border-color: rgba(0, 255, 156, 0.2);
+  background: rgba(0, 255, 156, 0.06);
+  border-color: var(--terminal-green);
 }
 
 .contest-info {
@@ -27,7 +27,7 @@
 }
 
 .contest-name {
-  color: #fff;
+  color: var(--text-main);
   font-size: 0.9rem;
   font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
@@ -35,7 +35,7 @@
 
 .contest-time {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -57,5 +57,5 @@
 .register-btn:hover {
   background: var(--terminal-green);
   color: #000;
-  box-shadow: 0 0 15px rgba(0, 255, 156, 0.4);
+  box-shadow: 0 0 15px var(--terminal-green);
 }

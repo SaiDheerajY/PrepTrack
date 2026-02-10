@@ -13,6 +13,7 @@ import Videos from "./Videos";
 import PomodoroPage from "./Pomodoropage";
 import Summary from "./Summary";
 import CodeforcesProfile from "./codeforcesprofile";
+import CodeVault from "./CodeVault";
 
 import "./App.css";
 
@@ -27,6 +28,7 @@ function Dashboard() {
   // -- STATE --
   const [videos, setVideos] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [snippets, setSnippets] = useState([]);
   const [dailyLog, setDailyLog] = useState({});
   const [streak, setStreak] = useState(0);
   const [lastActiveDate, setLastActiveDate] = useState("");
@@ -35,6 +37,11 @@ function Dashboard() {
   const isInitialized = useRef(false); // Guard: prevent saving before data loads
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(() => {
+    const saved = localStorage.getItem("lightMode");
+    return saved ? saved === "true" : false; // Default to FALSE (Dark Mode)
+  });
+  const [showSurge, setShowSurge] = useState(false);
 
   // -- THEME STATE (Simple) --
   // Restoring simple theme state since CSS supports it
@@ -55,7 +62,56 @@ function Dashboard() {
     if (currentTheme !== "spring") {
       document.body.classList.add(`theme-${currentTheme}`);
     }
-  }, [currentTheme]);
+    if (isLightMode) {
+      document.body.classList.add("light-theme");
+    }
+  }, [currentTheme, isLightMode]);
+
+  const playThemeSound = (isLight) => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      if (isLight) {
+        // Higher pitched technical "on" surge
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      } else {
+        // Deeper "power down" hum
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      }
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.5);
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  };
+
+  const toggleLightMode = () => {
+    const nextMode = !isLightMode;
+    setShowSurge(true);
+    playThemeSound(nextMode);
+
+    // Delay switch until the "Cyber Curtain" fully covers the screen
+    setTimeout(() => {
+      setIsLightMode(nextMode);
+      localStorage.setItem("lightMode", nextMode);
+    }, 400); // Increased from 150ms to 400ms
+
+    setTimeout(() => setShowSurge(false), 1200); // Increased from 800ms
+  };
 
 
   // -- INITIAL FETCH & MIGRATION --
@@ -65,6 +121,7 @@ function Dashboard() {
     if (cloudData) {
       setVideos(cloudData.videos || []);
       setTasks(cloudData.tasks || []);
+      setSnippets(cloudData.snippets || []);
       setDailyLog(cloudData.dailyLog || {});
       setStreak(cloudData.streak || 0);
       setLastActiveDate(cloudData.lastActiveDate || "");
@@ -78,6 +135,7 @@ function Dashboard() {
 
       const localVideos = getLocal("videos") || [];
       const localTasks = getLocal("tasks") || [];
+      const localSnippets = getLocal("snippets") || [];
       const localLog = getLocal("dailyLog") || {};
       const localStreak = Number(localStorage.getItem(`streak_${uid}`) || localStorage.getItem("streak")) || 0;
       const localLastActive = localStorage.getItem(`lastActiveDate_${uid}`) || localStorage.getItem("lastActiveDate") || "";
@@ -85,6 +143,7 @@ function Dashboard() {
 
       setVideos(localVideos);
       setTasks(localTasks);
+      setSnippets(localSnippets);
       setDailyLog(localLog);
       setStreak(localStreak);
       setLastActiveDate(localLastActive);
@@ -93,6 +152,7 @@ function Dashboard() {
       saveData({
         videos: localVideos,
         tasks: localTasks,
+        snippets: localSnippets,
         dailyLog: localLog,
         streak: localStreak,
         lastActiveDate: localLastActive,
@@ -108,16 +168,17 @@ function Dashboard() {
   // -- PERSISTENCE (only runs AFTER initial data is loaded) --
   useEffect(() => {
     if (!uid || !isInitialized.current) return; // <-- GUARD: skip until data loaded
-    const dataToSave = { videos, tasks, dailyLog, streak, lastActiveDate, notificationsEnabled };
+    const dataToSave = { videos, tasks, snippets, dailyLog, streak, lastActiveDate, notificationsEnabled };
     saveData(dataToSave);
 
     localStorage.setItem(getKey("videos"), JSON.stringify(videos));
     localStorage.setItem(getKey("tasks"), JSON.stringify(tasks));
+    localStorage.setItem(getKey("snippets"), JSON.stringify(snippets));
     localStorage.setItem(getKey("dailyLog"), JSON.stringify(dailyLog));
     localStorage.setItem(getKey("streak"), streak);
     localStorage.setItem(getKey("lastActiveDate"), lastActiveDate);
     localStorage.setItem(getKey("notificationsEnabled"), notificationsEnabled);
-  }, [videos, tasks, dailyLog, streak, lastActiveDate, notificationsEnabled, uid, saveData, getKey]);
+  }, [videos, tasks, snippets, dailyLog, streak, lastActiveDate, notificationsEnabled, uid, saveData, getKey]);
 
 
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => Number(localStorage.getItem(getKey("leftPanelWidth"))) || (window.innerWidth * 0.75));
@@ -216,7 +277,10 @@ function Dashboard() {
 
   return (
     <div className="terminal-dashboard">
-      <div className="scanlines"></div>
+      <div className="dashboard-bg-viz"></div>
+      <div className="dashboard-vignette"></div>
+      <div className="dashboard-scanlines"></div>
+      <div className={`theme-surge-overlay ${showSurge ? 'active' : ''}`}></div>
 
       {/* SIDEBAR NAVIGATION */}
       <div className={`terminal-sidebar ${isSidebarOpen ? 'open' : ''}`}>
@@ -233,6 +297,9 @@ function Dashboard() {
           </Link>
           <Link to="/contests" className="sidebar-link" onClick={() => setIsSidebarOpen(false)}>
             {`[ >> CONTEST_HUB ]`}
+          </Link>
+          <Link to="/vault" className="sidebar-link" onClick={() => setIsSidebarOpen(false)}>
+            {`[ >> CODE_VAULT ]`}
           </Link>
 
           <div className="sidebar-sep"></div>
@@ -303,6 +370,10 @@ function Dashboard() {
           <div className="user-status">
             USER: <span className="terminal-dim">{currentUser?.email?.split('@')[0]}</span>
           </div>
+          <button className="theme-toggle-btn" onClick={toggleLightMode} title="TOGGLE_HUD_INTENSITY">
+            <span className="icon">{isLightMode ? "☀️" : "🌙"}</span>
+            <span>{isLightMode ? "CLINICAL" : "NEON"}</span>
+          </button>
         </div>
       </div>
 
@@ -318,7 +389,7 @@ function Dashboard() {
         <div className="terminal-col right-col">
           <div style={{ flexShrink: 0, textAlign: 'right' }}>
             <div className="section-title" style={{ cursor: "pointer", userSelect: "none" }} onClick={() => setCalendarOpen(!calendarOpen)}>
-              SYSTEM_CALENDAR :: {new Date().getFullYear()} [{calendarOpen ? "OPEN" : "MIN"}]
+              SYSTEM_CALENDAR :: {new Date().getFullYear()} [<span className="terminal-green">{calendarOpen ? "OPEN" : "MIN"}</span>]
             </div>
             {calendarOpen && <MyCalendar dailyLog={dailyLog} />}
           </div>
@@ -361,6 +432,44 @@ function SummaryPage() {
   );
 }
 
+function VaultPage() {
+  const { currentUser } = useAuth();
+  const uid = currentUser?.uid;
+  const { data: cloudData, loading, saveData } = useFirestore(uid);
+  const [snippets, setSnippets] = useState(() => {
+    // Load from localStorage immediately for fast render
+    try {
+      const key = uid ? `snippets_${uid}` : "snippets";
+      return JSON.parse(localStorage.getItem(key)) || [];
+    } catch { return []; }
+  });
+  const isInit = useRef(false);
+
+  // Sync from cloud on load
+  useEffect(() => {
+    if (!uid || loading) return;
+    if (cloudData?.snippets && !isInit.current) {
+      setSnippets(cloudData.snippets);
+    }
+    isInit.current = true;
+  }, [uid, loading, cloudData]);
+
+  // Persist on change
+  useEffect(() => {
+    if (!uid || !isInit.current) return;
+    const key = uid ? `snippets_${uid}` : "snippets";
+    localStorage.setItem(key, JSON.stringify(snippets));
+    // Also save to cloud (merge with existing data)
+    if (cloudData) {
+      saveData({ ...cloudData, snippets });
+    }
+  }, [snippets, uid, saveData, cloudData]);
+
+  if (loading) return <div style={{ color: '#00ff9c', textAlign: 'center', marginTop: '40vh', fontFamily: 'monospace' }}>Loading vault...</div>;
+
+  return <CodeVault snippets={snippets} setSnippets={setSnippets} />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -372,6 +481,7 @@ function App() {
             <Route path="/contests" element={<ProtectedRoute><Contests /></ProtectedRoute>} />
             <Route path="/pomodoro" element={<ProtectedRoute><PomodoroPage /></ProtectedRoute>} />
             <Route path="/summary" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />
+            <Route path="/vault" element={<ProtectedRoute><VaultPage /></ProtectedRoute>} />
           </Routes>
         </div>
       </Router>
