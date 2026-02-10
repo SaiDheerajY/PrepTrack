@@ -39,7 +39,7 @@ function Tasks({ tasks = [], setTasks, markActivity, resetTasks }) {
     <div className="section-container">
       {/* HEADER */}
       <div className="section-title">
-        // TASKS :: LIST
+        TASKS :: LIST
       </div>
 
       {/* INPUT ROW */}

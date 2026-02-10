@@ -6,7 +6,9 @@ import "./Summary.css";
 export default function Summary({ dailyLog = {}, streak = 0 }) {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
-    const [view, setView] = useState("weekly"); // 'weekly' | 'monthly'
+    const [view, setView] = useState("weekly"); // 'weekly' | 'monthly' | 'custom'
+    const [customStart, setCustomStart] = useState("");
+    const [customEnd, setCustomEnd] = useState("");
     const [aiInsight, setAiInsight] = useState("");
     const [aiLoading, setAiLoading] = useState(false);
 
@@ -17,7 +19,6 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
         let startDate, endDate, chartLabels;
 
         if (view === "weekly") {
-            // Last 7 days
             startDate = new Date(today);
             startDate.setDate(today.getDate() - 6);
             endDate = today;
@@ -27,13 +28,25 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
                 d.setDate(startDate.getDate() + i);
                 chartLabels.push(dayNames[d.getDay()]);
             }
-        } else {
-            // Current month
+        } else if (view === "monthly") {
             startDate = new Date(today.getFullYear(), today.getMonth(), 1);
             endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             chartLabels = [];
             for (let i = 1; i <= endDate.getDate(); i++) {
                 chartLabels.push(String(i));
+            }
+        } else {
+            // Custom Range
+            startDate = customStart ? new Date(customStart) : new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            endDate = customEnd ? new Date(customEnd) : today;
+
+            // Generate labels based on duration
+            chartLabels = [];
+            const temp = new Date(startDate);
+            while (temp <= endDate) {
+                chartLabels.push(temp.toLocaleDateString("en-US", { month: 'short', day: 'numeric' }));
+                temp.setDate(temp.getDate() + 1);
+                if (chartLabels.length >= 31) break; // Limit chart density to 1 month max
             }
         }
 
@@ -44,9 +57,12 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
         const allTasks = [];
         const allVideos = [];
 
-        const cursor = new Date(startDate);
-        while (cursor <= endDate) {
+        // We use the generated labels length to ensure dailyTotals matches chartLabels
+        for (let i = 0; i < chartLabels.length; i++) {
+            const cursor = new Date(startDate);
+            cursor.setDate(startDate.getDate() + i);
             const key = cursor.toDateString();
+
             const log = dailyLog[key];
             const dayTasks = log?.tasksCompleted?.length || 0;
             const dayVideos = log?.videosCompleted?.length || 0;
@@ -58,13 +74,10 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
 
             if (log?.tasksCompleted) allTasks.push(...log.tasksCompleted);
             if (log?.videosCompleted) allVideos.push(...log.videosCompleted);
-
-            cursor.setDate(cursor.getDate() + 1);
         }
 
         const maxActivity = Math.max(...dailyTotals, 1);
 
-        // Most productive day
         let bestDayIdx = 0;
         dailyTotals.forEach((v, i) => {
             if (v > dailyTotals[bestDayIdx]) bestDayIdx = i;
@@ -83,12 +96,16 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
             allTasks: [...new Set(allTasks)].slice(0, 5),
             allVideos: [...new Set(allVideos)].slice(0, 5),
         };
-    }, [dailyLog, view]);
+    }, [dailyLog, view, customStart, customEnd]);
 
     // --- AI INSIGHTS ---
     const generateAiInsight = async () => {
         setAiLoading(true);
         setAiInsight("");
+
+        const timeRangeLabel = view === "custom"
+            ? `${customStart} to ${customEnd}`
+            : view;
 
         try {
             const token = await currentUser.getIdToken();
@@ -99,7 +116,7 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    view,
+                    view: timeRangeLabel,
                     totalTasks: stats.totalTasks,
                     totalVideos: stats.totalVideos,
                     activeDays: stats.activeDays,
@@ -127,107 +144,172 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
 
     return (
         <div className="summary-page">
+            <div className="dynamic-visual-bg"></div>
+
             <button className="exit-btn" onClick={() => navigate("/")}>
-                [ EXIT ]
+                &times; CLOSE
             </button>
 
-            <div className="summary-header">
-                <h1>📊 PrepTrack Wrapped</h1>
-                <p className="subtitle">
-                    {view === "weekly" ? "Last 7 Days" : new Date().toLocaleString("default", { month: "long", year: "numeric" })}
-                </p>
-            </div>
+            <div className="wrapped-viewport">
+                <header className="wrapped-header">
+                    <div className="year-tag">2026_COLLECTION</div>
+                    <h1 className="main-title">
+                        {view.toUpperCase()}
+                        <span className="highlight-text"> WRAPPED</span>
+                    </h1>
+                    <div className="period-subtitle">
+                        {view === "weekly" && "The Last 7 Days of Progress"}
+                        {view === "monthly" && new Date().toLocaleString("default", { month: "long" }).toUpperCase() + " SUMMARY"}
+                        {view === "custom" && `Analysis for Selection: ${customStart || '...'} to ${customEnd || '...'}`}
+                    </div>
+                </header>
 
-            {/* VIEW TOGGLE */}
-            <div className="view-toggle">
-                <button className={view === "weekly" ? "active" : ""} onClick={() => setView("weekly")}>
-                    [ WEEKLY ]
-                </button>
-                <button className={view === "monthly" ? "active" : ""} onClick={() => setView("monthly")}>
-                    [ MONTHLY ]
-                </button>
-            </div>
+                <div className="control-bar">
+                    <div className="toggle-group">
+                        <button className={view === "weekly" ? "active" : ""} onClick={() => setView("weekly")}>WEEK</button>
+                        <button className={view === "monthly" ? "active" : ""} onClick={() => setView("monthly")}>MONTH</button>
+                        <button className={view === "custom" ? "active" : ""} onClick={() => setView("custom")}>CUSTOM</button>
+                    </div>
 
-            {/* STAT CARDS */}
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-value">{stats.totalTasks}</div>
-                    <div className="stat-label">Tasks Completed</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-value">{stats.totalVideos}</div>
-                    <div className="stat-label">Videos Watched</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-value">{stats.activeDays}/{stats.totalDays}</div>
-                    <div className="stat-label">Active Days</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-value">{streak}</div>
-                    <div className="stat-label">Current Streak</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-value">{stats.bestDay}</div>
-                    <div className="stat-label">Most Productive</div>
-                </div>
-            </div>
-
-            {/* BAR CHART */}
-            <div className="chart-section">
-                <h3>Daily Activity</h3>
-                <div className="bar-chart">
-                    {stats.dailyTotals.map((val, i) => (
-                        <div className="bar-col" key={i}>
-                            <div
-                                className="bar"
-                                style={{ height: `${(val / stats.maxActivity) * 130}px` }}
-                                title={`${val} items`}
+                    {view === "custom" && (
+                        <div className="date-picker-row">
+                            <input
+                                type="date"
+                                className="wrapped-date-input"
+                                value={customStart}
+                                onChange={(e) => setCustomStart(e.target.value)}
                             />
-                            <span className="bar-label">{stats.chartLabels[i]}</span>
+                            <span className="date-sep">TO</span>
+                            <input
+                                type="date"
+                                className="wrapped-date-input"
+                                value={customEnd}
+                                onChange={(e) => setCustomEnd(e.target.value)}
+                            />
                         </div>
-                    ))}
+                    )}
+                </div>
+
+                <div className="wrapped-content">
+                    {/* KEY STATS ROW */}
+                    <section className="highlights-row">
+                        <div className="highlight-box">
+                            <span className="label">UNIT_VOLUME</span>
+                            <div className="value">{stats.totalTasks + stats.totalVideos}</div>
+                            <span className="trend">COMPLETED_UNITS</span>
+                        </div>
+                        <div className="highlight-box">
+                            <span className="label">COMMITMENT</span>
+                            <div className="value">{streak}</div>
+                            <span className="trend">DAY_STREAK</span>
+                        </div>
+                        <div className="highlight-box">
+                            <span className="label">PEAK_FLOW</span>
+                            <div className="value">{stats.bestDay}</div>
+                            <span className="trend">TOP_PRODUCTIVITY</span>
+                        </div>
+                    </section>
+
+                    {/* MAIN VISUALIZATION */}
+                    <section className="viz-container">
+                        <div className="viz-header">ACTIVITY_CHART</div>
+                        <div className="wrapped-chart">
+                            {stats.dailyTotals.map((val, i) => (
+                                <div className="chart-col" key={i}>
+                                    <div className="bar-stack">
+                                        <div
+                                            className="main-bar"
+                                            style={{
+                                                height: val > 0 ? `${(val / stats.maxActivity) * 100}%` : '4%',
+                                                background: val > 0 ? 'var(--terminal-green)' : 'rgba(255,255,255,0.05)'
+                                            }}
+                                        >
+                                            {val > 0 && <div className="bar-cap"></div>}
+                                            {val > 0 && <div className="bar-val-hint">{val}</div>}
+                                        </div>
+                                    </div>
+                                    <label>{stats.chartLabels[i]}</label>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* TWO COLUMN CONTENT */}
+                    <div className="dual-column">
+                        <section className="top-lists">
+                            <div className="list-panel">
+                                <h3>TOP_TASKS</h3>
+                                {stats.allTasks.length > 0 ? (
+                                    <div className="wrapped-list">
+                                        {stats.allTasks.map((t, i) => (
+                                            <div key={i} className="list-item">
+                                                <span className="num">0{i + 1}</span>
+                                                <span className="name">{t}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="empty-state">NO_DATA</div>
+                                )}
+                            </div>
+                            <div className="list-panel">
+                                <h3>TOP_VIDEOS</h3>
+                                {stats.allVideos.length > 0 ? (
+                                    <div className="wrapped-list">
+                                        {stats.allVideos.map((v, i) => (
+                                            <div key={i} className="list-item">
+                                                <span className="num">0{i + 1}</span>
+                                                <span className="name">{v}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="empty-state">NO_DATA</div>
+                                )}
+                            </div>
+                        </section>
+
+                        <section className="ai-insight-panel">
+                            <h3>NEURAL_ANALYSIS</h3>
+                            <div className="ai-card">
+                                {!aiInsight && !aiLoading && (
+                                    <div className="ai-init">
+                                        <p>Performance metrics ready for deep analysis.</p>
+                                        <button className="analyze-btn" onClick={generateAiInsight}>
+                                            ANALYZE_STATISTICS
+                                        </button>
+                                    </div>
+                                )}
+                                {aiLoading && (
+                                    <div className="ai-processing">
+                                        <div className="pulse-loader"></div>
+                                        <span>SEQUENCING_DATA...</span>
+                                    </div>
+                                )}
+                                {aiInsight && (
+                                    <div className="ai-finished">
+                                        <div className="quote-mark">"</div>
+                                        <p className="insight-text">{aiInsight}</p>
+                                        <button className="retry-btn" onClick={generateAiInsight}>RE-RUN</button>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </div>
 
-            {/* TOP ITEMS */}
-            <div className="top-items-section">
-                <h3>Top Completed Items</h3>
-                <div className="top-items-grid">
-                    <div className="top-items-list">
-                        <h4>Tasks</h4>
-                        {stats.allTasks.length > 0 ? (
-                            <ol>{stats.allTasks.map((t, i) => <li key={i}>{t}</li>)}</ol>
-                        ) : (
-                            <p className="no-data-msg">No tasks logged yet.</p>
-                        )}
-                    </div>
-                    <div className="top-items-list">
-                        <h4>Videos</h4>
-                        {stats.allVideos.length > 0 ? (
-                            <ol>{stats.allVideos.map((v, i) => <li key={i}>{v}</li>)}</ol>
-                        ) : (
-                            <p className="no-data-msg">No videos logged yet.</p>
-                        )}
-                    </div>
+            <footer className="wrapped-footer">
+                <div className="footer-left-group">
+                    <div className="footer-stat">[ ANALYTICS_MODE :: <span className="highlight-green">PERFORMANCE_MATRIX</span> ]</div>
+                    <div className="footer-stat">DATA_SOURCE: LOCAL_NODE + CLOUD_SYNC</div>
                 </div>
-            </div>
 
-            {/* AI INSIGHTS */}
-            <div className="ai-section">
-                <h3>🤖 AI Insights</h3>
-                {!aiInsight && !aiLoading && (
-                    <button className="ai-generate-btn" onClick={generateAiInsight}>
-                        [ GENERATE WRAPPED ]
-                    </button>
-                )}
-                {aiLoading && <p className="ai-loading">⏳ Analyzing your data...</p>}
-                {aiInsight && <div className="ai-response">{aiInsight}</div>}
-                {aiInsight && (
-                    <button className="ai-generate-btn" onClick={generateAiInsight} style={{ marginTop: '15px' }}>
-                        [ REGENERATE ]
-                    </button>
-                )}
-            </div>
+                <div className="footer-right-group">
+                    <div className="footer-stat">VIEW_CORE: {view.toUpperCase()}</div>
+                    <div className="footer-stat">© 2026 PREPTRACK_OS</div>
+                </div>
+            </footer>
         </div>
     );
 }

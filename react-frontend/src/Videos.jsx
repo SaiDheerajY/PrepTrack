@@ -94,7 +94,7 @@ function Videos({ videos = [], setVideos, markActivity, resetVideos, onDeleteVid
   return (
     <div className="section-container">
       <div className="section-title">
-        // VIDEOS :: PLAYLIST
+        VIDEOS :: PLAYLIST
       </div>
 
       <div className="terminal-input-row">

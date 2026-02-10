@@ -62,80 +62,120 @@ export default function Login() {
     };
 
     return (
-        <div className="login-container">
-            <div className="scanlines"></div> {/* CRT OVERLAY EFFECT */}
+        <div className="login-page">
+            <div className="login-bg-viz"></div>
+            <div className="login-vignette"></div>
+            <div className="login-scanlines"></div>
 
-            {/* --- STAGE 1: INTRO SEQUENCE --- */}
-            {stage === "intro" && (
-                <div className="intro-box">
-                    <h1 className="glitch-text">PrepTrack</h1>
-                    <p className="terminal-subtitle">INITIALIZING SYSTEM...</p>
-                </div>
-            )}
-
-            {/* --- STAGE 2: SELECTION SCREEN --- */}
-            {stage === "selection" && (
-                <div className="selection-box">
-                    <button className="big-bracket-btn" onClick={() => handleSelection("signin")}>
-                        [ SIGN IN ]
-                    </button>
-                    <button className="big-bracket-btn" onClick={() => handleSelection("signup")}>
-                        [ SIGN UP ]
-                    </button>
-                    <button className="big-bracket-btn" onClick={handleGoogleLogin} style={{ borderColor: '#4285F4', color: '#4285F4', marginTop: '20px' }}>
-                        [ GOOGLE_AUTH ]
-                    </button>
-                </div>
-            )}
-
-            {/* --- STAGE 3: AUTHENTICATION FORM --- */}
-            {stage === "form" && (
-                <div className="login-form-box">
-                    <div className="form-header">
-                        <button className="text-btn" onClick={handleBack} style={{ fontSize: '0.9rem' }}>
-                            &lt; BACK
-                        </button>
-                        <span className="form-title">
-                            {isSignup ? "NEW_USER_REGISTRATION" : "USER_AUTHENTICATION"}
-                        </span>
+            <div className="login-interface">
+                {/* --- STAGE 1: INTRO SEQUENCE --- */}
+                {stage === "intro" && (
+                    <div className="branding-intro">
+                        <div className="logo-glitch-container">
+                            <h1 className="logo-text">PREP<span className="logo-accent">TRACK</span></h1>
+                            <div className="logo-glow"></div>
+                        </div>
+                        <div className="loading-bar-container">
+                            <div className="loading-bar-fill"></div>
+                        </div>
+                        <p className="loading-status">INITIALIZING_CORE_SYSTEMS...</p>
                     </div>
+                )}
 
-                    {error && <div style={{ color: "#ff4444", marginBottom: "1rem", border: "1px dashed #ff4444", padding: "10px" }}>ERR: {error}</div>}
-
-                    <form onSubmit={handleSubmit}>
-                        <div className="login-field">
-                            <label className="field-label">USER_ID / EMAIL</label>
-                            <input
-                                className="field-input"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                autoFocus
-                                required
-                                placeholder="enter_email..."
-                            />
+                {/* --- STAGE 2: SELECTION SCREEN --- */}
+                {stage === "selection" && (
+                    <div className="auth-selection">
+                        <div className="auth-header">
+                            <h2 className="auth-brand">PREPTRACK_OS</h2>
+                            <p className="auth-tagline">QUANTUM_PRODUCTIVITY_INTERFACE</p>
                         </div>
 
-                        <div className="login-field">
-                            <label className="field-label">ACCESS_KEY / PASSWORD</label>
-                            <input
-                                className="field-input"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                placeholder="sv_cheats 1..."
-                            />
-                        </div>
+                        <div className="auth-options">
+                            <button className="premium-auth-btn" onClick={() => handleSelection("signin")}>
+                                <span className="btn-label">EXISTING_USER</span>
+                                <span className="btn-value">SIGN_IN</span>
+                            </button>
+                            <button className="premium-auth-btn secondary" onClick={() => handleSelection("signup")}>
+                                <span className="btn-label">NEW_ENTITY</span>
+                                <span className="btn-value">CREATE_ACCOUNT</span>
+                            </button>
 
-                        <div style={{ textAlign: 'right', marginTop: '2.5rem' }}>
-                            <button type="submit" className="big-bracket-btn" style={{ fontSize: '1.2rem', padding: '10px 30px' }}>
-                                [ {isSignup ? "REGISTER" : "LOGIN"} ]
+                            <div className="auth-divider">
+                                <span>OR_AUTHENTICATE_VIA</span>
+                            </div>
+
+                            <button className="google-auth-btn" onClick={handleGoogleLogin}>
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" />
+                                SIGN_IN_WITH_GOOGLE
                             </button>
                         </div>
-                    </form>
-                </div>
-            )}
+                    </div>
+                )}
+
+                {/* --- STAGE 3: AUTHENTICATION FORM --- */}
+                {stage === "form" && (
+                    <div className="auth-form-container">
+                        <header className="auth-form-header">
+                            <button className="back-link" onClick={handleBack}>
+                                &larr; RETURN
+                            </button>
+                            <div className="form-info">
+                                <span className="form-mode">{isSignup ? "REGISTRATION" : "AUTHENTICATION"}</span>
+                                <span className="form-session">SESSION_ID: {Math.random().toString(16).slice(2, 8).toUpperCase()}</span>
+                            </div>
+                        </header>
+
+                        <div className="auth-form-body">
+                            {error && (
+                                <div className="auth-error-box">
+                                    <div className="error-icon">!</div>
+                                    <div className="error-msg">SYSTEM_ERROR: {error}</div>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit}>
+                                <div className="auth-input-group">
+                                    <label>IDENTIFIER_EMAIL</label>
+                                    <div className="input-wrapper">
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            autoFocus
+                                            required
+                                            placeholder="user@preptrack.sys"
+                                        />
+                                        <div className="input-glow"></div>
+                                    </div>
+                                </div>
+
+                                <div className="auth-input-group">
+                                    <label>ACCESS_PASSCODE</label>
+                                    <div className="input-wrapper">
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            placeholder="••••••••"
+                                        />
+                                        <div className="input-glow"></div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" className="auth-submit-btn">
+                                    {isSignup ? "AUTHORIZE_NEW_USER" : "ESTABLISH_CONNECTION"}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <footer className="auth-footer">
+                <span className="build-ver">v4.0.2-STABLE</span>
+                <span className="sys-status">ALL_SYSTEMS_OPERATIONAL [OK]</span>
+            </footer>
         </div>
     );
 }

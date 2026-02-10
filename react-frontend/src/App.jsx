@@ -34,6 +34,8 @@ function Dashboard() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const isInitialized = useRef(false); // Guard: prevent saving before data loads
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // -- THEME STATE (Simple) --
   // Restoring simple theme state since CSS supports it
   const [currentTheme, setCurrentTheme] = useState(() => localStorage.getItem("appTheme") || "spring");
@@ -187,6 +189,7 @@ function Dashboard() {
     const handleMouseMove = (e) => {
       if (!isDragging.current) return;
       const container = document.querySelector(".terminal-main-grid");
+      if (!container) return;
       const rect = container.getBoundingClientRect();
       let newWidth = e.clientX - rect.left;
       newWidth = Math.max(240, newWidth);
@@ -215,67 +218,98 @@ function Dashboard() {
     <div className="terminal-dashboard">
       <div className="scanlines"></div>
 
-      <div className="terminal-header-row">
-        <div className="brand-text">
-          PREPTRACK
+      {/* SIDEBAR NAVIGATION */}
+      <div className={`terminal-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <span className="terminal-green">NAV_MENU</span>
+          <button className="text-btn close-sidebar" onClick={() => setIsSidebarOpen(false)}>[ X ]</button>
         </div>
-        <div className="user-status">
-          STREAK: <span style={{ color: 'var(--terminal-green)', fontWeight: 'bold' }}>{streak}</span>
-        </div>
+        <div className="sidebar-content">
+          <Link to="/pomodoro" className="sidebar-link" onClick={() => setIsSidebarOpen(false)}>
+            {`[ >> POMODORO_TIMER ]`}
+          </Link>
+          <Link to="/summary" className="sidebar-link" onClick={() => setIsSidebarOpen(false)}>
+            {`[ >> WRAPPED ]`}
+          </Link>
+          <Link to="/contests" className="sidebar-link" onClick={() => setIsSidebarOpen(false)}>
+            {`[ >> CONTEST_HUB ]`}
+          </Link>
 
-        <Link to="/pomodoro" className="nav-link" style={{ color: 'var(--terminal-green)', textDecoration: 'none' }}>
-          {`[ >> POMODORO_TIMER ]`}
-        </Link>
-        <Link to="/summary" className="nav-link" style={{ color: 'var(--terminal-green)', textDecoration: 'none' }}>
-          {`[ >> WRAPPED ]`}
-        </Link>
+          <div className="sidebar-sep"></div>
 
-        <div className="user-status">
-          USER: {currentUser?.email}
+          <div className="sidebar-stat">
+            <span className="label">THEME:</span>
+            <button className="text-btn theme-btn" onClick={cycleTheme}>
+              {currentTheme.toUpperCase()}
+            </button>
+          </div>
 
-          <button className="text-btn" onClick={async () => {
-            const newState = !notificationsEnabled;
-            if (newState) {
+          <div className="sidebar-stat">
+            <span className="label">NOTIFS:</span>
+            <button className="text-btn" onClick={async () => {
+              const newState = !notificationsEnabled;
               const authToken = await currentUser.getIdToken();
-              const result = await enableNotifications(
-                currentUser.email,
-                currentUser.displayName || currentUser.email.split('@')[0],
-                authToken
-              );
-              if (result.success) {
-                setNotificationsEnabled(true);
-                localStorage.setItem(getKey("notificationsEnabled"), "true");
-                await updateNotificationPreference(true, authToken);
-                if (result.emailSuccess) alert("✅ Notifications enabled!");
-                else alert(`⚠️ Enabled, but email failed: ${result.emailError}`);
+              if (newState) {
+                const result = await enableNotifications(
+                  currentUser.email,
+                  currentUser.displayName || currentUser.email.split('@')[0],
+                  authToken
+                );
+                if (result.success) {
+                  setNotificationsEnabled(true);
+                  localStorage.setItem(getKey("notificationsEnabled"), "true");
+                  await updateNotificationPreference(true, authToken);
+                }
               } else {
-                alert(`❌ Failed: ${result.error}`);
+                setNotificationsEnabled(false);
+                localStorage.setItem(getKey("notificationsEnabled"), "false");
+                await updateNotificationPreference(false, authToken);
               }
-            } else {
-              setNotificationsEnabled(false);
-              localStorage.setItem(getKey("notificationsEnabled"), "false");
-              const authToken = await currentUser.getIdToken();
-              await updateNotificationPreference(false, authToken);
-            }
-          }} style={{ marginLeft: '20px' }}>
-            [ NOTIFS: {notificationsEnabled ? 'ON' : 'OFF'} ]
-          </button>
+            }}>
+              {notificationsEnabled ? 'ENABLED' : 'DISABLED'}
+            </button>
+          </div>
 
-          {/* THEME TOGGLE (Restored Simple Version) */}
-          <button className="text-btn" onClick={cycleTheme} style={{ marginLeft: '10px', color: 'var(--terminal-green)' }}>
-            [ THEME: {currentTheme.toUpperCase()} ]
-          </button>
+          <div className="sidebar-sep"></div>
 
-          <button className="text-btn" onClick={logout} style={{ marginLeft: '10px' }}>
-            LOGOUT
+          <button className="text-btn logout-btn" onClick={logout}>
+            [ LOGOUT_SESSION ]
           </button>
+        </div>
+      </div>
+
+      {/* OVERLAY FOR SIDEBAR */}
+      {isSidebarOpen && <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>}
+
+      <div className="terminal-header-row">
+        <div className="header-left">
+          <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
+            <div className="line"></div>
+            <div className="line"></div>
+            <div className="line"></div>
+          </button>
+          <div className="brand-text">
+            PREP<span className="logo-accent">TRACK</span>
+          </div>
+        </div>
+
+        <div className="header-center">
+          <div className="user-status">
+            STREAK: <span className="terminal-green">{streak}</span>
+          </div>
+        </div>
+
+        <div className="header-right">
+          <div className="user-status">
+            USER: <span className="terminal-dim">{currentUser?.email?.split('@')[0]}</span>
+          </div>
         </div>
       </div>
 
       <div className="terminal-main-grid" style={{ "--left-width": `${leftPanelWidth}px` }}>
         <div className="terminal-col left-col">
           <Tasks tasks={tasks} setTasks={setTasks} markActivity={markActivity} resetTasks={resetTasks} />
-          <div className="ascii-sep">{"-".repeat(40)}</div>
+          <div style={{ height: '40px' }}></div>
           <Videos videos={videos} setVideos={setVideos} markActivity={markActivity} resetVideos={resetVideos} onDeleteVideo={handleDeleteVideo} />
         </div>
 
@@ -288,7 +322,7 @@ function Dashboard() {
             </div>
             {calendarOpen && <MyCalendar dailyLog={dailyLog} />}
           </div>
-          <div className="ascii-sep" style={{ margin: "10px 0", textAlign: 'right' }}>{"=".repeat(60)}</div>
+          <div className="ascii-sep" style={{ margin: "20px 0", textAlign: 'right', opacity: 0.1 }}>{"=".repeat(60)}</div>
           <div style={{ flexShrink: 0 }}>
             <Contests />
             <CodeforcesProfile />
@@ -315,10 +349,14 @@ function SummaryPage() {
 
   if (loading) return <div style={{ color: '#00ff9c', textAlign: 'center', marginTop: '40vh', fontFamily: 'monospace' }}>Loading data...</div>;
 
+  // Use cloud data if available, otherwise fallback to local for immediate feedback
+  const dailyLog = cloudData?.dailyLog || JSON.parse(localStorage.getItem(`dailyLog_${uid}`) || localStorage.getItem("dailyLog") || '{}');
+  const streak = cloudData?.streak || Number(localStorage.getItem(`streak_${uid}`) || localStorage.getItem("streak")) || 0;
+
   return (
     <Summary
-      dailyLog={cloudData?.dailyLog || {}}
-      streak={cloudData?.streak || 0}
+      dailyLog={dailyLog}
+      streak={streak}
     />
   );
 }

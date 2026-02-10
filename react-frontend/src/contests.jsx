@@ -47,7 +47,7 @@ function Contests() {
 
   return (
     <div className="contests-box">
-      <h2>Codeforces Contests</h2>
+      <div className="section-title">UPCOMING_CONTESTS :: CF</div>
 
       {contests.map(contest => (
         <div key={contest.id} className="contest-card">
