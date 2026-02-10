@@ -17,7 +17,7 @@ import CodeVault from "./CodeVault";
 
 import "./App.css";
 
-function Dashboard() {
+function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, showSurge }) {
   const { currentUser } = useAuth();
 
   // -- FIREBASE SYNC --
@@ -37,81 +37,6 @@ function Dashboard() {
   const isInitialized = useRef(false); // Guard: prevent saving before data loads
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLightMode, setIsLightMode] = useState(() => {
-    const saved = localStorage.getItem("lightMode");
-    return saved ? saved === "true" : false; // Default to FALSE (Dark Mode)
-  });
-  const [showSurge, setShowSurge] = useState(false);
-
-  // -- THEME STATE (Simple) --
-  // Restoring simple theme state since CSS supports it
-  const [currentTheme, setCurrentTheme] = useState(() => localStorage.getItem("appTheme") || "spring");
-
-  const themes = ["spring", "amber", "cyber", "matrix"];
-  const cycleTheme = () => {
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    const nextTheme = themes[nextIndex];
-    setCurrentTheme(nextTheme);
-    localStorage.setItem("appTheme", nextTheme);
-  };
-
-  useEffect(() => {
-    // Apply theme to body
-    document.body.className = ""; // clear previous
-    if (currentTheme !== "spring") {
-      document.body.classList.add(`theme-${currentTheme}`);
-    }
-    if (isLightMode) {
-      document.body.classList.add("light-theme");
-    }
-  }, [currentTheme, isLightMode]);
-
-  const playThemeSound = (isLight) => {
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      if (isLight) {
-        // Higher pitched technical "on" surge
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-      } else {
-        // Deeper "power down" hum
-        oscillator.type = 'square';
-        oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-      }
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.5);
-    } catch (e) {
-      console.error("Audio error:", e);
-    }
-  };
-
-  const toggleLightMode = () => {
-    const nextMode = !isLightMode;
-    setShowSurge(true);
-    playThemeSound(nextMode);
-
-    // Delay switch until the "Cyber Curtain" fully covers the screen
-    setTimeout(() => {
-      setIsLightMode(nextMode);
-      localStorage.setItem("lightMode", nextMode);
-    }, 400); // Increased from 150ms to 400ms
-
-    setTimeout(() => setShowSurge(false), 1200); // Increased from 800ms
-  };
 
 
   // -- INITIAL FETCH & MIGRATION --
@@ -465,19 +390,77 @@ function VaultPage() {
     }
   }, [snippets, uid, saveData, cloudData]);
 
-  if (loading) return <div style={{ color: '#00ff9c', textAlign: 'center', marginTop: '40vh', fontFamily: 'monospace' }}>Loading vault...</div>;
+  if (loading) return <div style={{ color: 'var(--terminal-green)', textAlign: 'center', marginTop: '40vh', fontFamily: 'monospace' }}>Loading vault...</div>;
 
   return <CodeVault snippets={snippets} setSnippets={setSnippets} />;
 }
 
 function App() {
+  const [isLightMode, setIsLightMode] = useState(() => {
+    const saved = localStorage.getItem("lightMode");
+    return saved ? saved === "true" : false;
+  });
+  const [currentTheme, setCurrentTheme] = useState(() => localStorage.getItem("appTheme") || "spring");
+  const [showSurge, setShowSurge] = useState(false);
+
+  const themes = ["spring", "amber", "cyber", "matrix"];
+  const cycleTheme = () => {
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const nextTheme = themes[nextIndex];
+    setCurrentTheme(nextTheme);
+    localStorage.setItem("appTheme", nextTheme);
+  };
+
+  const playThemeSound = (isLight) => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      if (isLight) {
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      } else {
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      }
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.5);
+    } catch (e) { }
+  };
+
+  const toggleLightMode = () => {
+    const nextMode = !isLightMode;
+    setShowSurge(true);
+    playThemeSound(nextMode);
+    setTimeout(() => {
+      setIsLightMode(nextMode);
+      localStorage.setItem("lightMode", nextMode);
+    }, 400);
+    setTimeout(() => setShowSurge(false), 1200);
+  };
+
+  useEffect(() => {
+    document.body.className = "";
+    if (currentTheme !== "spring") document.body.classList.add(`theme-${currentTheme}`);
+    if (isLightMode) document.body.classList.add("light-theme");
+  }, [currentTheme, isLightMode]);
+
   return (
     <AuthProvider>
       <Router>
         <div className="App">
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><Dashboard isLightMode={isLightMode} toggleLightMode={toggleLightMode} currentTheme={currentTheme} cycleTheme={cycleTheme} showSurge={showSurge} /></ProtectedRoute>} />
             <Route path="/contests" element={<ProtectedRoute><Contests /></ProtectedRoute>} />
             <Route path="/pomodoro" element={<ProtectedRoute><PomodoroPage /></ProtectedRoute>} />
             <Route path="/summary" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />

@@ -5,6 +5,7 @@
 :root {
   --bg-color: #050505;
   --terminal-color: #00ff9c;
+  --terminal-green-rgb: 0, 255, 156;
   /* Added this as the base */
   --terminal-green: var(--terminal-color);
   /* Spring Green */
@@ -35,6 +36,7 @@ body.light-theme {
   --bg-color: #f0f2f5;
   /* Slightly deeper background for contrast */
   --terminal-green: #0062cc;
+  --terminal-green-rgb: 0, 98, 204;
   /* Sharper Clinical Blue */
   --terminal-dim: rgba(0, 98, 204, 0.1);
   --text-main: #111111;

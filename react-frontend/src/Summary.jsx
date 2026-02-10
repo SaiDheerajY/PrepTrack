@@ -145,6 +145,11 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
     return (
         <div className="summary-page">
             <div className="dynamic-visual-bg"></div>
+            <div className="wrapped-grid-overlay"></div>
+            <div className="wrapped-vignette"></div>
+            <div className="wrapped-scanlines"></div>
+            <div className="wrapped-glow-orb orb-1"></div>
+            <div className="wrapped-glow-orb orb-2"></div>
 
             <button className="exit-btn" onClick={() => navigate("/")}>
                 &times; CLOSE
