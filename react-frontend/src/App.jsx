@@ -313,8 +313,8 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
 
         <div className="terminal-col right-col">
           <div style={{ flexShrink: 0, textAlign: 'right' }}>
-            <div className="section-title" style={{ cursor: "pointer", userSelect: "none" }} onClick={() => setCalendarOpen(!calendarOpen)}>
-              SYSTEM_CALENDAR :: {new Date().getFullYear()} [<span className="terminal-green">{calendarOpen ? "OPEN" : "MIN"}</span>]
+            <div className="section-title right-aligned" style={{ cursor: "pointer", userSelect: "none" }} onClick={() => setCalendarOpen(!calendarOpen)}>
+              SYSTEM_CALENDAR :: [<span className="terminal-green">{calendarOpen ? "OPEN" : "MIN"}</span>]
             </div>
             {calendarOpen && <MyCalendar dailyLog={dailyLog} />}
           </div>

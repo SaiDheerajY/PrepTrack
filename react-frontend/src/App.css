@@ -491,6 +491,10 @@ body.light-theme .right-col {
   text-transform: uppercase;
 }
 
+.section-title.right-aligned {
+  justify-content: flex-end;
+}
+
 .section-title::before {
   content: "//";
   color: var(--terminal-green);
@@ -2074,10 +2078,72 @@ body.light-theme .ascii-sep {
     gap: 10px;
     text-align: center;
     padding: 20px;
+    font-size: 0.65rem;
   }
 
   .footer-right {
     justify-content: center;
+  }
+
+  /* 6. LOGIN PAGE & GLOBAL MOBILE TEXT */
+  body {
+    font-size: 12px;
+  }
+
+  .logo-text {
+    font-size: 2.5rem;
+    letter-spacing: 5px;
+    padding-left: 5px;
+  }
+
+  .branding-intro::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .loading-bar-container {
+    width: 150px;
+  }
+
+  .auth-selection,
+  .auth-form-container {
+    width: 90%;
+    /* Keep max-width from desktop to avoid super wide forms on tablets */
+    padding: 20px;
+  }
+
+  .auth-form-header {
+    padding: 15px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .form-info {
+    text-align: left;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .auth-form-body {
+    padding: 20px;
+  }
+
+  .premium-auth-btn {
+    padding: 15px;
+  }
+
+  .auth-footer {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 40px;
+    padding: 0 20px 20px 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
   }
 }
 
