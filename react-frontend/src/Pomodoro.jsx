@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./Pomodoro.css";
 
-export default function Pomodoro({ tasks = [] }) {
+export default function Pomodoro({ tasks = [], persistedLog = [], onUpdateLog }) {
     const [mode, setMode] = useState("WORK"); // WORK | BREAK
     const [minutesInput, setMinutesInput] = useState(25);
     const [breakInput, setBreakInput] = useState(5);
@@ -10,7 +10,6 @@ export default function Pomodoro({ tasks = [] }) {
     const [running, setRunning] = useState(false);
     const [cycles, setCycles] = useState(0);
     const [selectedTaskId, setSelectedTaskId] = useState("");
-    const [sessionLog, setSessionLog] = useState([]);
     const [ambience, setAmbience] = useState("NONE"); // NONE | HUM | RAIN
     const [autoStart, setAutoStart] = useState(false);
 
@@ -146,7 +145,8 @@ export default function Pomodoro({ tasks = [] }) {
         if (mode === "WORK") {
             const newCycles = cycles + 1;
             setCycles(newCycles);
-            setSessionLog(prev => [`[${timestamp}] COMPLETED: FOCUS SESSION #${newCycles} (${selectedTask.text})`, ...prev]);
+            const newLogEntry = `[${timestamp}] COMPLETED: FOCUS SESSION #${newCycles} (${selectedTask.text})`;
+            onUpdateLog([newLogEntry, ...persistedLog]);
 
             // Auto-switch logic
             const isLongBreak = newCycles % 4 === 0;
@@ -163,7 +163,8 @@ export default function Pomodoro({ tasks = [] }) {
                 }, 1000);
             }
         } else {
-            setSessionLog(prev => [`[${timestamp}] COMPLETED: ${mode.replace('_', ' ')}`, ...prev]);
+            const newLogEntry = `[${timestamp}] COMPLETED: ${mode.replace('_', ' ')}`;
+            onUpdateLog([newLogEntry, ...persistedLog]);
             setMode("WORK");
             setSecondsLeft(minutesInput * 60);
             if (autoStart) {
@@ -209,10 +210,10 @@ export default function Pomodoro({ tasks = [] }) {
             <header className="pomodoro-header-nav">
                 <div className="brand-label">
                     PREP<span className="logo-accent">TRACK</span> // POMODORO_INTERFACE
+                    <button className="exit-btn" onClick={() => window.history.back()}>
+                        RETURN_TO_DASHBOARD
+                    </button>
                 </div>
-                <button className="exit-btn" onClick={() => window.history.back()}>
-                    RETURN_TO_DASHBOARD
-                </button>
             </header>
 
             <div className="pomodoro-content-wrapper">
@@ -343,8 +344,8 @@ export default function Pomodoro({ tasks = [] }) {
                     <div className="pomodoro-right">
                         <div className="log-header">COMMAND_HISTORY_LOG</div>
                         <div className="session-log">
-                            {sessionLog.length === 0 && <div className="dim-text">Waiting for session initialization...</div>}
-                            {sessionLog.map((entry, i) => (
+                            {persistedLog.length === 0 && <div className="dim-text">Waiting for session initialization...</div>}
+                            {persistedLog.map((entry, i) => (
                                 <div key={i} className="log-entry">
                                     <span className="terminal-green">TRC_</span> {entry}
                                 </div>

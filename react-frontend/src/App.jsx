@@ -34,6 +34,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
   const [lastActiveDate, setLastActiveDate] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [pomodoroLog, setPomodoroLog] = useState([]);
   const isInitialized = useRef(false); // Guard: prevent saving before data loads
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,6 +53,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
       setStreak(cloudData.streak || 0);
       setLastActiveDate(cloudData.lastActiveDate || "");
       setNotificationsEnabled(cloudData.notificationsEnabled || false);
+      setPomodoroLog(cloudData.pomodoroLog || []);
     } else {
       const getLocal = (k) => {
         const namespaced = localStorage.getItem(`${k}_${uid}`);
@@ -66,6 +68,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
       const localStreak = Number(localStorage.getItem(`streak_${uid}`) || localStorage.getItem("streak")) || 0;
       const localLastActive = localStorage.getItem(`lastActiveDate_${uid}`) || localStorage.getItem("lastActiveDate") || "";
       const localNotif = (localStorage.getItem(`notificationsEnabled_${uid}`) || localStorage.getItem("notificationsEnabled")) === "true";
+      const localPomodoroLog = getLocal("pomodoroLog") || [];
 
       setVideos(localVideos);
       setTasks(localTasks);
@@ -74,6 +77,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
       setStreak(localStreak);
       setLastActiveDate(localLastActive);
       setNotificationsEnabled(localNotif);
+      setPomodoroLog(localPomodoroLog);
 
       saveData({
         videos: localVideos,
@@ -82,7 +86,8 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
         dailyLog: localLog,
         streak: localStreak,
         lastActiveDate: localLastActive,
-        notificationsEnabled: localNotif
+        notificationsEnabled: localNotif,
+        pomodoroLog: localPomodoroLog
       });
     }
 
@@ -94,7 +99,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
   // -- PERSISTENCE (only runs AFTER initial data is loaded) --
   useEffect(() => {
     if (!uid || !isInitialized.current) return; // <-- GUARD: skip until data loaded
-    const dataToSave = { videos, tasks, snippets, dailyLog, streak, lastActiveDate, notificationsEnabled };
+    const dataToSave = { videos, tasks, snippets, dailyLog, streak, lastActiveDate, notificationsEnabled, pomodoroLog };
     saveData(dataToSave);
 
     localStorage.setItem(getKey("videos"), JSON.stringify(videos));
@@ -104,7 +109,8 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
     localStorage.setItem(getKey("streak"), streak);
     localStorage.setItem(getKey("lastActiveDate"), lastActiveDate);
     localStorage.setItem(getKey("notificationsEnabled"), notificationsEnabled);
-  }, [videos, tasks, snippets, dailyLog, streak, lastActiveDate, notificationsEnabled, uid, saveData, getKey]);
+    localStorage.setItem(getKey("pomodoroLog"), JSON.stringify(pomodoroLog));
+  }, [videos, tasks, snippets, dailyLog, streak, lastActiveDate, notificationsEnabled, pomodoroLog, uid, saveData, getKey]);
 
 
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => Number(localStorage.getItem(getKey("leftPanelWidth"))) || (window.innerWidth * 0.75));

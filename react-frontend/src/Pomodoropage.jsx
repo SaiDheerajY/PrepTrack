@@ -7,7 +7,7 @@ export default function PomodoroPage() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     const uid = currentUser?.uid;
-    const { data: cloudData, loading } = useFirestore(uid);
+    const { data: cloudData, loading, saveData } = useFirestore(uid);
 
     if (loading) {
         return (
@@ -17,7 +17,15 @@ export default function PomodoroPage() {
         );
     }
 
+    const handleUpdateLogs = (newLogs) => {
+        saveData({ ...cloudData, pomodoroLog: newLogs });
+    };
+
     return (
-        <Pomodoro tasks={cloudData?.tasks || []} />
+        <Pomodoro
+            tasks={cloudData?.tasks || []}
+            persistedLog={cloudData?.pomodoroLog || []}
+            onUpdateLog={handleUpdateLogs}
+        />
     );
 }

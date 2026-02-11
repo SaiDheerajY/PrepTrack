@@ -992,6 +992,16 @@ body:not(.light-theme) .vault-hero-stat .stat-label {
     box-sizing: border-box;
 }
 
+.vault-field select option {
+    background-color: #111;
+    color: var(--text-main);
+}
+
+body.light-theme .vault-field select option {
+    background-color: white;
+    color: #333;
+}
+
 .vault-field input:focus,
 .vault-field select:focus,
 .vault-field textarea:focus {
