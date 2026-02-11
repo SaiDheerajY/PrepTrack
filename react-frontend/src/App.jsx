@@ -37,6 +37,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
   const isInitialized = useRef(false); // Guard: prevent saving before data loads
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
 
 
   // -- INITIAL FETCH & MIGRATION --
@@ -295,6 +296,9 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
           <div className="user-status">
             USER: <span className="terminal-dim">{currentUser?.email?.split('@')[0]}</span>
           </div>
+          <button className="mobile-panel-toggle" onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}>
+            [<span className="terminal-green">{isRightPanelOpen ? "HIDE" : "SHOW"}</span> STATS]
+          </button>
           <button className="theme-toggle-btn" onClick={toggleLightMode} title="TOGGLE_HUD_INTENSITY">
             <span className="icon">{isLightMode ? "☀️" : "🌙"}</span>
             <span>{isLightMode ? "CLINICAL" : "NEON"}</span>
@@ -311,7 +315,7 @@ function Dashboard({ isLightMode, toggleLightMode, currentTheme, cycleTheme, sho
 
         <div className="terminal-resizer" onMouseDown={handleMouseDown}></div>
 
-        <div className="terminal-col right-col">
+        <div className={`terminal-col right-col ${isRightPanelOpen ? 'mobile-visible' : ''}`}>
           <div style={{ flexShrink: 0, textAlign: 'right' }}>
             <div className="section-title right-aligned" style={{ cursor: "pointer", userSelect: "none" }} onClick={() => setCalendarOpen(!calendarOpen)}>
               SYSTEM_CALENDAR :: [<span className="terminal-green">{calendarOpen ? "OPEN" : "MIN"}</span>]

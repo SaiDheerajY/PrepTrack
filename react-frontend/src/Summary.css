@@ -481,6 +481,159 @@
     }
 }
 
+/* ========================= MOBILE RESPONSIVENESS ========================= */
+@media (max-width: 900px) {
+    .wrapped-viewport {
+        padding: 20px;
+        gap: 30px;
+    }
+
+    .exit-btn {
+        top: 15px;
+        right: 15px;
+        padding: 8px 18px;
+        font-size: 0.6rem;
+    }
+
+    .year-tag {
+        font-size: 0.7rem;
+        letter-spacing: 6px;
+    }
+
+    .main-title {
+        font-size: 2.5rem;
+        letter-spacing: -1px;
+    }
+
+    .period-subtitle {
+        font-size: 1rem;
+        letter-spacing: 3px;
+    }
+
+    .toggle-group {
+        padding: 4px;
+        flex-wrap: wrap;
+    }
+
+    .toggle-group button {
+        padding: 8px 20px;
+        font-size: 0.7rem;
+    }
+
+    .date-picker-row {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .wrapped-date-input {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .highlights-row {
+        gap: 15px;
+    }
+
+    .highlight-box {
+        padding: 20px 25px;
+    }
+
+    .highlight-box .label {
+        font-size: 0.6rem;
+        letter-spacing: 3px;
+    }
+
+    .highlight-box .value {
+        font-size: 2rem;
+    }
+
+    .highlight-box .trend {
+        font-size: 0.6rem;
+    }
+
+    .viz-container {
+        padding: 20px;
+    }
+
+    .viz-header {
+        font-size: 0.6rem;
+        letter-spacing: 3px;
+    }
+
+    .wrapped-chart {
+        height: 200px;
+        gap: 10px;
+    }
+
+    .chart-col label {
+        font-size: 0.6rem;
+    }
+
+    .bar-val-hint {
+        font-size: 0.6rem;
+    }
+
+    .dual-column {
+        gap: 30px;
+    }
+
+    .list-panel h3,
+    .ai-insight-panel h3 {
+        font-size: 0.7rem;
+        letter-spacing: 4px;
+        margin-bottom: 20px;
+    }
+
+    .list-item {
+        padding: 15px 20px;
+        gap: 15px;
+    }
+
+    .list-item .num {
+        font-size: 0.7rem;
+    }
+
+    .list-item .name {
+        font-size: 0.8rem;
+    }
+
+    .ai-card {
+        padding: 30px 20px;
+        min-height: 200px;
+    }
+
+    .insight-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .analyze-btn {
+        padding: 12px 35px;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+
+    .wrapped-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .footer-left-group,
+    .footer-right-group {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .footer-stat {
+        font-size: 0.55rem;
+    }
+}
+
+
 /* FOOTER SECTION */
 .wrapped-footer {
     width: 100%;

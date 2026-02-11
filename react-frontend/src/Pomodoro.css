@@ -473,3 +473,139 @@ body.light-theme .text-btn {
         font-size: 8rem;
     }
 }
+
+/* ========================= MOBILE RESPONSIVENESS ========================= */
+@media (max-width: 900px) {
+    .pomodoro-page {
+        overflow-y: auto;
+    }
+
+    .pomodoro-header-nav {
+        padding: 20px 20px 15px 20px;
+    }
+
+    .brand-label {
+        font-size: 0.7rem;
+        letter-spacing: 4px;
+    }
+
+    .exit-btn {
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        font-size: 0.6rem;
+    }
+
+    .pomodoro-content-wrapper {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .pomodoro-terminal {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .pomodoro-left,
+    .pomodoro-right {
+        padding: 20px;
+    }
+
+    .mode-switcher {
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .mode-btn {
+        padding: 6px 12px;
+        font-size: 0.55rem;
+        letter-spacing: 1px;
+    }
+
+    .timer-display {
+        font-size: 4rem !important;
+        letter-spacing: -2px;
+    }
+
+    .timer-status {
+        bottom: -20px;
+        font-size: 0.6rem;
+        letter-spacing: 4px;
+    }
+
+    .ascii-bar {
+        margin: 20px 0;
+    }
+
+    .pomodoro-controls {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .bracket-btn {
+        width: 100%;
+        padding: 12px 30px;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+
+    .pomodoro-config {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding-top: 30px;
+    }
+
+    .config-row label {
+        font-size: 0.55rem;
+    }
+
+    .terminal-select,
+    .terminal-number-input {
+        padding: 10px;
+        font-size: 0.7rem;
+    }
+
+    .ambience-toggles {
+        flex-wrap: wrap;
+    }
+
+    .text-btn {
+        padding: 8px 14px;
+        font-size: 0.6rem;
+    }
+
+    .log-header {
+        padding: 15px 20px;
+        font-size: 0.6rem;
+        letter-spacing: 2px;
+    }
+
+    .session-log {
+        padding: 20px;
+        font-size: 0.7rem;
+    }
+
+    .log-entry {
+        padding: 10px 0;
+    }
+
+    .pomodoro-footer {
+        padding: 12px 20px;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .footer-left-group,
+    .footer-right-group {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .footer-stat {
+        font-size: 0.55rem;
+    }
+}

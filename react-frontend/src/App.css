@@ -1889,6 +1889,12 @@ body.light-theme .theme-toggle-btn:hover {
   background: rgba(0, 0, 0, 0.08);
 }
 
+/* Hide mobile panel toggle on desktop */
+.mobile-panel-toggle {
+  display: none;
+}
+
+
 /* Additional Light Theme Visibility Fixes */
 body.light-theme .task-item {
   border-bottom-color: rgba(0, 0, 0, 0.05);
@@ -1984,7 +1990,8 @@ body.light-theme .ascii-sep {
     display: flex;
     flex-direction: column;
     height: auto;
-    overflow-y: auto;
+    min-height: auto;
+    overflow: visible;
   }
 
   .terminal-col {
@@ -1992,21 +1999,50 @@ body.light-theme .ascii-sep {
     max-width: 100% !important;
     min-width: 100% !important;
     height: auto !important;
-    overflow: visible;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 1.5rem;
     padding-bottom: 40px;
   }
 
   .left-col {
     border-right: none;
     border-bottom: 1px solid var(--terminal-dim);
+    overflow: visible;
+    max-height: none !important;
+    contain: none !important;
   }
 
   .right-col {
+    display: none;
+    /* Hidden by default on mobile */
     box-shadow: none;
     border-left: none;
     padding-right: 1.5rem;
-    /* Restore padding */
+    overflow: visible;
+    max-height: none !important;
+    contain: none !important;
   }
+
+
+  .right-col.mobile-visible {
+    display: block !important;
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
 
   /* 2. HIDE RESIZER */
   .terminal-resizer {
@@ -2032,6 +2068,38 @@ body.light-theme .ascii-sep {
   .user-status {
     display: none;
     /* Hide specific user info to save space */
+  }
+
+  /* Mobile Panel Toggle Button */
+  .mobile-panel-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-right: 10px;
+  }
+
+  .mobile-panel-toggle:hover {
+    background: rgba(0, 255, 156, 0.08);
+    border-color: var(--terminal-green);
+  }
+
+  body.light-theme .mobile-panel-toggle {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  body.light-theme .mobile-panel-toggle:hover {
+    background: rgba(0, 98, 204, 0.08);
+    border-color: var(--terminal-green);
   }
 
   /* 4. TYPOGRAPHY & TOUCH TARGETS */
