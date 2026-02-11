@@ -77,18 +77,19 @@
 }
 
 .exit-btn {
-    position: absolute;
-    top: 8px;
-    right: 25px;
+    position: fixed;
+    top: -10px;
+    right: 10px;
+    z-index: 1000;
     background: rgba(255, 255, 255, 0.03);
-    border: var(--glass-border);
-    color: var(--text-muted);
-    padding: 8px 18px;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #666;
+    padding: 10px 25px;
     cursor: pointer;
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 2px;
     transition: all 0.3s;
-    z-index: 100;
 }
 
 .exit-btn:hover {
@@ -505,7 +506,7 @@ body.light-theme .text-btn {
     }
 
     .exit-btn {
-        top: 8px;
+        top: -7px;
         right: 15px;
         margin-bottom: 15px;
         padding-bottom: 10px;
