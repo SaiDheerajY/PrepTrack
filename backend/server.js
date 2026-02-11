@@ -32,9 +32,9 @@ cron.schedule('0 20 * * *', async () => {
 });
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors()); // Allow all origins for now to simplify initial cloud connection
 app.use(express.json()); // Enable JSON body parsing
 
 /**

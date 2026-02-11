@@ -16,7 +16,8 @@ function Contests() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/codeforces/contests")
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    fetch(`${baseUrl}/api/codeforces/contests`)
       .then(res => res.json())
       .then(data => {
         const now = Date.now();

@@ -18,7 +18,8 @@ export default function CodeforcesProfile() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5000/api/codeforces/user/${handle}`);
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const response = await fetch(`${baseUrl}/api/codeforces/user/${handle}`);
       const data = await response.json();
 
       if (data.status === "OK") {

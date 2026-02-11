@@ -12,7 +12,8 @@ export async function enableNotifications(userEmail, userName, authToken) {
     let emailSuccess = false;
     let emailError = null;
     try {
-      const emailResponse = await fetch("http://localhost:5000/api/send-notification-email", {
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const emailResponse = await fetch(`${baseUrl}/api/send-notification-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +48,8 @@ export async function enableNotifications(userEmail, userName, authToken) {
  */
 export async function updateNotificationPreference(enabled, authToken) {
   try {
-    const response = await fetch("http://localhost:5000/api/update-notification-preference", {
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const response = await fetch(`${baseUrl}/api/update-notification-preference`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

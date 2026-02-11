@@ -109,7 +109,8 @@ export default function Summary({ dailyLog = {}, streak = 0 }) {
 
         try {
             const token = await currentUser.getIdToken();
-            const res = await fetch("http://localhost:5000/api/ai-summary", {
+            const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await fetch(`${baseUrl}/api/ai-summary`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
