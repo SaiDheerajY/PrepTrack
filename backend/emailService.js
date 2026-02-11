@@ -1,19 +1,25 @@
 import nodemailer from 'nodemailer';
 
-// Email configuration
-// Email configuration - Explicitly set for cloud reliability
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // Use SSL/TLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  },
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 15000
-});
+// Lazy transporter — created on first use so dotenv has time to load
+let transporter = null;
+
+function getTransporter() {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000
+    });
+  }
+  return transporter;
+}
 
 /**
  * Send notification welcome email
@@ -103,7 +109,7 @@ export async function sendNotificationWelcomeEmail(userEmail, userName) {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
+    const info = await getTransporter().sendMail(mailOptions);
     console.log('✅ Notification email sent:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -174,7 +180,7 @@ export async function sendStreakReminder(userEmail, userName) {
  */
 export async function verifyEmailConfig() {
   try {
-    await transporter.verify();
+    await getTransporter().verify();
     console.log('✅ Email service is ready');
     return true;
   } catch (error) {
