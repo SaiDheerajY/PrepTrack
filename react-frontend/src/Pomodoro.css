@@ -63,7 +63,8 @@
     justify-content: flex-start;
     /* Align brand to left */
     align-items: center;
-    border-bottom: 1px solid rgba(var(--terminal-green-rgb), 0.1);
+    border-bottom: none;
+    box-shadow: inset 0 10px 0 rgba(var(--terminal-green-rgb), 0.0);
     background: var(--panel-bg);
     backdrop-filter: blur(10px);
 }
@@ -78,10 +79,10 @@
 
 .exit-btn {
     position: fixed;
-    top: -10px;
+    top: -25px;
     right: 10px;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.03);
+    background: #000;
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #666;
     padding: 10px 25px;
@@ -506,7 +507,7 @@ body.light-theme .text-btn {
     }
 
     .exit-btn {
-        top: -7px;
+        top: 12px;
         right: 15px;
         margin-bottom: 15px;
         padding-bottom: 10px;
