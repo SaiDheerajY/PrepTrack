@@ -1,12 +1,18 @@
 import nodemailer from 'nodemailer';
 
 // Email configuration
+// Email configuration - Explicitly set for cloud reliability
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL/TLS
   auth: {
-    user: process.env.EMAIL_USER || 'saidheeraj01062005@gmail.com',
-    pass: process.env.EMAIL_PASSWORD || 'sliejcnvacuupkpm'
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  },
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 15000
 });
 
 /**
@@ -144,7 +150,7 @@ export async function sendStreakReminder(userEmail, userName) {
           <p>We noticed you haven't logged any activity today. Your streak is at risk of resetting to 0 at midnight!</p>
           <p>Log a task or video now to keep your momentum going.</p>
           <div style="text-align: center;">
-            <a href="http://localhost:3000" class="btn">LOG ACTIVITY NOW</a>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" class="btn">LOG ACTIVITY NOW</a>
           </div>
           <div class="footer">PrepTrack Intelligence System</div>
         </div>
