@@ -237,7 +237,7 @@ body:not(.light-theme) .vault-hero-stat .stat-label {
     align-items: center;
     gap: 10px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--grid-line);
     padding: 8px 14px;
     max-width: 280px;
     flex: 1;
@@ -447,7 +447,7 @@ body:not(.light-theme) .vault-hero-stat .stat-label {
     gap: 14px;
     padding: 14px 16px;
     margin-bottom: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--grid-line);
     border-left: 3px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
