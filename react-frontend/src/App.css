@@ -320,7 +320,8 @@ body.light-theme .sidebar-link:hover {
   padding-left: 20px;
 }
 
-Riverside header styling */ .sidebar-header h2 {
+/* Riverside header styling */
+.sidebar-header h2 {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.9rem;
   color: var(--terminal-green);
@@ -1622,7 +1623,8 @@ body.light-theme .video-list-item.active {
   background: rgba(0, 255, 156, 0.05);
 }
 
-Riverside header styling */ .big-bracket-btn {
+/* Riverside header styling */
+.big-bracket-btn {
   font-family: 'Orbitron', sans-serif;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2159,9 +2161,27 @@ body.light-theme .ascii-sep {
   }
 
   .logo-text {
-    font-size: 2.5rem;
-    letter-spacing: 5px;
-    padding-left: 5px;
+    font-size: 2.2rem !important;
+    letter-spacing: 4px !important;
+    padding-left: 0 !important;
+  }
+
+  /* Center intro perfectly */
+  .branding-intro {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    height: 100vh !important;
+    margin-top: -10vh !important;
+    /* Optical centering */
+  }
+
+  .loading-status {
+    font-size: 0.6rem !important;
+    letter-spacing: 1px !important;
+    margin-top: 15px !important;
   }
 
   .branding-intro::before {
@@ -2175,9 +2195,29 @@ body.light-theme .ascii-sep {
 
   .auth-selection,
   .auth-form-container {
-    width: 90%;
-    /* Keep max-width from desktop to avoid super wide forms on tablets */
-    padding: 20px;
+    width: 92% !important;
+    max-width: none !important;
+    padding: 24px 20px !important;
+    border: 1px solid rgba(0, 255, 156, 0.1) !important;
+    background: rgba(10, 10, 10, 0.95) !important;
+    position: relative !important;
+    z-index: 100 !important;
+  }
+
+  .auth-options {
+    gap: 12px !important;
+  }
+
+  .premium-auth-btn {
+    padding: 18px 15px !important;
+  }
+
+  .btn-label {
+    font-size: 0.55rem !important;
+  }
+
+  .btn-value {
+    font-size: 0.85rem !important;
   }
 
   .auth-form-header {
@@ -2197,21 +2237,45 @@ body.light-theme .ascii-sep {
     padding: 20px;
   }
 
-  .premium-auth-btn {
-    padding: 15px;
+  .auth-input-group label {
+    font-size: 0.6rem !important;
+    margin-bottom: 8px !important;
   }
 
-  .auth-footer {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    width: 100%;
-    margin-top: 40px;
-    padding: 0 20px 20px 20px;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+  .auth-input-group input {
+    padding: 18px 15px !important;
+    /* Deeper inputs for mobile touch */
+    font-size: 1rem !important;
+  }
+
+  .auth-submit-btn {
+    padding: 22px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .auth-brand {
+    font-size: 1.5rem !important;
+    /* Reduced from default to fit */
+    margin-bottom: 5px !important;
+  }
+
+  .auth-tagline {
+    font-size: 0.65rem !important;
+    letter-spacing: 1px !important;
+  }
+
+  /* Fix Google Button */
+  .google-auth-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 15px !important;
+    font-size: 0.8rem !important;
+    margin-top: 15px !important;
+  }
+
+  .auth-divider {
+    margin: 20px 0 !important;
+    font-size: 0.6rem !important;
   }
 }
 

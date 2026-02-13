@@ -86,7 +86,7 @@ export default function Login() {
                 {stage === "selection" && (
                     <div className="auth-selection">
                         <div className="auth-header">
-                            <h2 className="auth-brand">PREPTRACK_OS</h2>
+                            <h2 className="auth-brand">PREPTRACK</h2>
                             <p className="auth-tagline">QUANTUM_PRODUCTIVITY_INTERFACE</p>
                         </div>
 
